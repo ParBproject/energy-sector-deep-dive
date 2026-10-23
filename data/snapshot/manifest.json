@@ -1,0 +1,113 @@
+{
+  "built_at": "2026-10-23T00:49:53+00:00",
+  "start": "2015-01-01",
+  "sources": {
+    "yfinance": {
+      "ok": true,
+      "symbols": [
+        "APA",
+        "BKR",
+        "BZ=F",
+        "CL=F",
+        "COP",
+        "CVX",
+        "DVN",
+        "EOG",
+        "ET",
+        "FANG",
+        "HAL",
+        "KMI",
+        "MPC",
+        "NG=F",
+        "OKE",
+        "OXY",
+        "PSX",
+        "SLB",
+        "SPY",
+        "VLO",
+        "WMB",
+        "XLE",
+        "XOM",
+        "^GSPC"
+      ],
+      "first": "2015-01-02",
+      "last": "2026-10-22",
+      "first_valid": {
+        "APA": "2015-01-02",
+        "BKR": "2015-01-02",
+        "BZ=F": "2015-01-02",
+        "CL=F": "2015-01-02",
+        "COP": "2015-01-02",
+        "CVX": "2015-01-02",
+        "DVN": "2015-01-02",
+        "EOG": "2015-01-02",
+        "ET": "2015-01-02",
+        "FANG": "2015-01-02",
+        "HAL": "2015-01-02",
+        "KMI": "2015-01-02",
+        "MPC": "2015-01-02",
+        "NG=F": "2015-01-02",
+        "OKE": "2015-01-02",
+        "OXY": "2015-01-02",
+        "PSX": "2015-01-02",
+        "SLB": "2015-01-02",
+        "SPY": "2015-01-02",
+        "VLO": "2015-01-02",
+        "WMB": "2015-01-02",
+        "XLE": "2015-01-02",
+        "XOM": "2015-01-02",
+        "^GSPC": "2015-01-02"
+      }
+    },
+    "fred": {
+      "ok": true,
+      "series": [
+        "CPIAUCSL",
+        "DCOILBRENTEU",
+        "DCOILWTICO",
+        "DGS10",
+        "DHHNGSP",
+        "DTB3",
+        "INDPRO"
+      ],
+      "mode": "fredgraph.csv"
+    },
+    "edgar": {
+      "ok": true,
+      "tickers": [
+        "APA",
+        "BKR",
+        "COP",
+        "CVX",
+        "DVN",
+        "EOG",
+        "ET",
+        "FANG",
+        "HAL",
+        "KMI",
+        "MPC",
+        "OKE",
+        "OXY",
+        "PSX",
+        "SLB",
+        "VLO",
+        "WMB",
+        "XOM"
+      ],
+      "missing": [],
+      "rows": 17329
+    },
+    "famafrench": {
+      "ok": true,
+      "last": "2026-08-31"
+    },
+    "eia": {
+      "ok": false,
+      "reason": "EIA_API_KEY not set"
+    },
+    "rigcount": {
+      "ok": false,
+      "reason": "Baker Hughes site returns 403 to scripts; EIA mirror needs EIA_API_KEY"
+    }
+  }
+}

@@ -1,0 +1,63 @@
+# Company universe, fixed as of the study start date (2015-01-02).
+# Tickers are the CURRENT trading symbols used to pull continuous price history;
+# `ticker_2015` records the symbol/entity that traded at the start date when it differs.
+start_date: "2015-01-02"
+benchmarks:
+  XLE: Energy Select Sector SPDR (sector benchmark)
+  SPY: SPDR S&P 500 ETF (market benchmark)
+  "^GSPC": S&P 500 index (price only)
+commodities:   # same Yahoo symbols as ParBproject/commodity-price-forecaster
+  "CL=F": WTI crude oil front-month future
+  "BZ=F": Brent crude oil front-month future
+  "NG=F": Henry Hub natural gas front-month future
+segments:
+  majors:
+    label: Integrated majors
+    members:
+      XOM: {name: Exxon Mobil, predecessor_ciks: [34088], note: "SEC lists XOM under a new registrant CIK (2115436) from Aug 2026; earlier filings sit under CIK 34088."}
+      CVX: {name: Chevron}
+      COP: {name: ConocoPhillips, note: "Pure-play E&P since the 2012 Phillips 66 spin-off; grouped with majors by size."}
+  upstream:
+    label: Exploration & production
+    members:
+      EOG: {name: EOG Resources}
+      DVN: {name: Devon Energy, note: "Merged with WPX Energy (Jan 2021)."}
+      FANG: {name: Diamondback Energy, note: "Acquired Endeavor (2024, private) and Energen (2018)."}
+      OXY: {name: Occidental Petroleum, note: "Acquired Anadarko (2019)."}
+      APA: {name: APA Corp, ticker_2015: APA (Apache Corp), predecessor_ciks: [6769], note: "Apache became a subsidiary of holding company APA Corp in Mar 2021; ticker unchanged. Pre-2021 filings are under Apache CIK 6769."}
+  midstream:
+    label: Pipelines & midstream
+    members:
+      KMI: {name: Kinder Morgan}
+      WMB: {name: Williams Companies}
+      OKE: {name: ONEOK, note: "Absorbed ONEOK Partners (2017), Magellan (2023)."}
+      ET: {name: Energy Transfer LP, ticker_2015: ETE (Energy Transfer Equity), note: "ETE acquired ETP and was renamed ET in Oct 2018; MLP (K-1), price history continuous under ET."}
+  refiners:
+    label: Refining & marketing
+    members:
+      MPC: {name: Marathon Petroleum, note: "Acquired Andeavor (ex-Tesoro) in 2018."}
+      VLO: {name: Valero Energy}
+      PSX: {name: Phillips 66}
+  services:
+    label: Oilfield services
+    members:
+      SLB: {name: SLB (Schlumberger), note: "Acquired Cameron (2016)."}
+      HAL: {name: Halliburton}
+      BKR: {name: Baker Hughes, ticker_2015: BHI (Baker Hughes Inc), predecessor_ciks: [808362], note: "BHI merged with GE Oil & Gas in Jul 2017 (BHGE), renamed BKR in 2019. Yahoo serves continuous BKR history from 2015 (BHI predecessor). Pre-2017 filings are under BHI CIK 808362."}
+# Names in the 2015 opportunity set that no longer trade. Listed so the survivorship
+# bias of the universe above is explicit; yfinance has no reliable history for them.
+lost_to_ma_or_bankruptcy:
+  APC: {name: Anadarko Petroleum, fate: "Acquired by OXY, Aug 2019"}
+  NBL: {name: Noble Energy, fate: "Acquired by CVX, Oct 2020"}
+  CXO: {name: Concho Resources, fate: "Acquired by COP, Jan 2021"}
+  PXD: {name: Pioneer Natural Resources, fate: "Acquired by XOM, May 2024"}
+  MRO: {name: Marathon Oil, fate: "Acquired by COP, Nov 2024"}
+  HES: {name: Hess, fate: "Acquired by CVX, Jul 2025"}
+  XEC: {name: Cimarex Energy, fate: "Merged with Cabot into Coterra, Oct 2021"}
+  CHK: {name: Chesapeake Energy, fate: "Chapter 11 Jun 2020; old equity cancelled. Re-listed, now Expand Energy (EXE)"}
+  WLL: {name: Whiting Petroleum, fate: "Chapter 11 Apr 2020; later merged into Chord Energy"}
+  SE: {name: Spectra Energy, fate: "Acquired by Enbridge, Feb 2017"}
+  TSO: {name: Tesoro / Andeavor, fate: "Acquired by MPC, Oct 2018"}
+  CAM: {name: Cameron International, fate: "Acquired by SLB, Apr 2016"}
+  FTI: {name: FMC Technologies, fate: "Merged with Technip, Jan 2017 (later split; TechnipFMC trades as FTI)"}
+  WFT: {name: Weatherford, fate: "Chapter 11 Jul 2019; old equity cancelled"}
