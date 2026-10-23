@@ -7,7 +7,8 @@
     "fundamentals.json",
     "clustering.json",
     "factor_model.json",
-    "scenarios.json"
+    "scenarios.json",
+    "timeseries.json"
   ],
   "sources": {
     "market_sizing.json": "SEC EDGAR 10-K XBRL (point-in-time)",
@@ -15,6 +16,7 @@
     "fundamentals.json": "SEC EDGAR 10-K XBRL + yfinance",
     "clustering.json": "derived: results/returns.json + fundamentals.json",
     "factor_model.json": "yfinance, FRED DGS10, Fama-French",
-    "scenarios.json": "yfinance, Fama-French, commodity-price-forecaster (vendored)"
+    "scenarios.json": "yfinance, Fama-French, commodity-price-forecaster (vendored)",
+    "timeseries.json": "yfinance adjusted closes, weekly total-return index"
   }
 }
