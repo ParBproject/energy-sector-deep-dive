@@ -8,7 +8,7 @@ pipeline whose results are presented in an interactive explorer.
 It is the companion to [commodity-price-forecaster](https://github.com/ParBproject/commodity-price-forecaster).
 Both use the same WTI, Brent and Henry Hub series (Yahoo `CL=F`, `BZ=F`, `NG=F`).
 
-> Status: **Milestone 3 (modelling and forecaster tie-in)** complete. Findings below are generated from `results/*.json`.
+> Status: **Milestone 4 (design system and app shell)** complete. Findings below are generated from `results/*.json`.
 
 ## Scope
 - **Period:** 2015-01-02 to present, daily prices; quarterly and annual fundamentals.
@@ -140,7 +140,9 @@ Forecaster tie-in: the latest one-step WTI forecast published by [commodity-pric
 1. **M1 – Scope and data** ✅ universe, cached loaders, point-in-time EDGAR, offline snapshot, CI workflow (staged).
 2. **M2 – Core analyses** ✅ market sizing (bottom-up proxy), oil beta with HAC errors, rolling correlations, shock drawdowns, point-in-time fundamentals. Notebooks in `notebooks/`.
 3. **M3 – Modelling** ✅ clustering vs segments (silhouette, ARI), weekly HAC factor model with walk-forward OOS R², leakage tests, oil scenario module fed by the commodity forecaster (`src/scenarios/`).
-4. **M4 – Design system and explorer scaffold:** React + TypeScript + Vite in `web/`, dark theme with emerald `#10B981`, reading precomputed JSON from `src/export/`.
+4. **M4 – Design system and app shell** ✅ `web/`: Vite + React + TS, tokens in one file shared with the Python charts, ECharts theme, sticky filters, KPI strip, chart cards, 390 px mobile layout, styleguide route.
+
+   ![App shell, desktop](docs/img/ui_m4_desktop.png)
 5. **M5 – Interactive explorer:** linked filters, brush-to-zoom, synced hover, sector → segment → company drill-down, compare pins, oil-scenario slider fed by the commodity forecaster (a what-if tool, not a signal).
 6. **M6 – Polish and launch:** mobile (390 px first), Lighthouse ≥ 90 mobile performance and accessibility, README visuals, GitHub Pages deploy, portfolio-site card.
 

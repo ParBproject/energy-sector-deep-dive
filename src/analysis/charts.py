@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -13,15 +15,13 @@ from matplotlib.patches import Patch  # noqa: E402
 from src.analysis.common import ROOT, SEGMENT_ORDER, segment_labels  # noqa: E402
 
 IMG = ROOT / "docs" / "img"
-BG, PANEL, TEXT, MUTED, GRID = "#0B0F14", "#111827", "#E5E7EB", "#9CA3AF", "#1F2937"
-EMERALD = "#10B981"
-SEG_COLORS = {
-    "majors": EMERALD,
-    "upstream": "#34D399",
-    "midstream": "#60A5FA",
-    "refiners": "#F59E0B",
-    "services": "#A78BFA",
-}
+# Colours and type come from the app's single token source (web/src/design/tokens.ts ->
+# tokens.json via `npm run tokens`), so README charts and the explorer match.
+TOKENS = json.loads((ROOT / "web" / "src" / "design" / "tokens.json").read_text())
+_C = TOKENS["color"]
+BG, PANEL, TEXT, MUTED, GRID = _C["bg"], _C["surface1"], _C["text"], _C["textMuted"], _C["grid"]
+EMERALD = _C["accent"]
+SEG_COLORS = dict(_C["segment"])
 
 
 def theme() -> None:
@@ -141,7 +141,7 @@ def drawdowns(ret: dict) -> str:
     fig, ax = plt.subplots(figsize=(9, 4.6))
     x = np.arange(len(dd.columns))
     w = 0.8 / len(keys)
-    colors = {**SEG_COLORS, "XLE": TEXT, "SPY": MUTED, "CL=F": "#EF4444"}
+    colors = {**SEG_COLORS, "XLE": TEXT, "SPY": MUTED, "CL=F": _C["danger"]}
     for i, k in enumerate(keys):
         ax.bar(x + i * w - 0.4 + w / 2, dd.loc[k] * 100, w, color=colors[k], label=labels[k])
     ax.set_xticks(x, dd.columns)
@@ -194,7 +194,7 @@ def fundamentals_heatmap(fund: dict) -> str:
 
 # ── M3 ──────────────────────────────────────────────────────────────────────
 MARKERS = {"majors": "o", "upstream": "s", "midstream": "D", "refiners": "^", "services": "v"}
-CLUSTER_COLORS = [EMERALD, "#60A5FA", "#F59E0B", "#A78BFA", "#F472B6", "#E5E7EB"]
+CLUSTER_COLORS = [EMERALD, *SEG_COLORS.values()]
 
 
 def clusters(cl: dict) -> str:
@@ -250,7 +250,11 @@ def oos_r2(fm: dict) -> str:
         label="same-week factors (exposure stability)",
     )
     ax.bar(
-        x + 0.2, np.array(pr) * 100, 0.38, color="#EF4444", label="last week's factors (forecast)"
+        x + 0.2,
+        np.array(pr) * 100,
+        0.38,
+        color=_C["danger"],
+        label="last week's factors (forecast)",
     )
     ax.axhline(0, color=MUTED, lw=0.8)
     ax.set_xticks(x, [labels[s] for s in SEGMENT_ORDER], fontsize=8.5)
@@ -268,7 +272,9 @@ def factor_tstats(fm: dict) -> str:
     facs = fm["factors"]
     mat = np.array([[fm["full_sample"][s]["t_hac"][f] for f in facs] for s in SEGMENT_ORDER])
     fig, ax = plt.subplots(figsize=(9, 4))
-    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("div", ["#EF4444", PANEL, EMERALD])
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
+        "div", [_C["danger"], PANEL, EMERALD]
+    )
     ax.imshow(np.clip(mat, -6, 6), cmap=cmap, vmin=-6, vmax=6, aspect="auto")
     ax.grid(False)
     for i in range(mat.shape[0]):
