@@ -6,7 +6,7 @@ const read = (f: string) => JSON.parse(readFileSync(new URL(`../public/data/${f}
 
 describe("exported results JSON (make export)", () => {
   const index = read("index.json");
-  it("index lists every file with a source and an as-of date", () => {
+  it("index lists every file (incl. timeseries) with a source and an as-of date", () => {
     expect(index.as_of).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     for (const f of index.files) {
       expect(index.sources[f]).toBeTruthy();

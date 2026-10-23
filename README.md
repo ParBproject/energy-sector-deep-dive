@@ -8,7 +8,8 @@ pipeline whose results are presented in an interactive explorer.
 It is the companion to [commodity-price-forecaster](https://github.com/ParBproject/commodity-price-forecaster).
 Both use the same WTI, Brent and Henry Hub series (Yahoo `CL=F`, `BZ=F`, `NG=F`).
 
-> Status: **Milestone 4 (design system and app shell)** complete. Findings below are generated from `results/*.json`.
+> Status: **Milestone 5 (interactive explorer)** complete. Live: https://parbproject.github.io/energy-sector-deep-dive/
+> Findings below are generated from `results/*.json`.
 
 ## Scope
 - **Period:** 2015-01-02 to present, daily prices; quarterly and annual fundamentals.
@@ -143,7 +144,7 @@ Forecaster tie-in: the latest one-step WTI forecast published by [commodity-pric
 4. **M4 – Design system and app shell** ✅ `web/`: Vite + React + TS, tokens in one file shared with the Python charts, ECharts theme, sticky filters, KPI strip, chart cards, 390 px mobile layout, styleguide route.
 
    ![App shell, desktop](docs/img/ui_m4_desktop.png)
-5. **M5 – Interactive explorer:** linked filters, brush-to-zoom, synced hover, sector → segment → company drill-down, compare pins, oil-scenario slider fed by the commodity forecaster (a what-if tool, not a signal).
+5. **M5 – Interactive explorer (done):** six views from exported data, Zustand store synced to the URL hash, company drawer, Framer Motion with reduced-motion support, 390 px layout, deployed to GitHub Pages from `gh-pages` (no workflow). linked filters, brush-to-zoom, synced hover, sector → segment → company drill-down, compare pins, oil-scenario slider fed by the commodity forecaster (a what-if tool, not a signal).
 6. **M6 – Polish and launch:** mobile (390 px first), Lighthouse ≥ 90 mobile performance and accessibility, README visuals, GitHub Pages deploy, portfolio-site card.
 
 ## How to run
@@ -170,7 +171,7 @@ python -m scripts.make_notebooks   # rebuild and execute notebooks/0*.ipynb
 config/universe.yaml   fixed 2015 universe, segments, M&A / bankruptcy notes
 src/data/              cached loaders: prices, fred, edgar, eia, rigs, famafrench, snapshot
 src/analysis/          (M2–M3) returns, betas, fundamentals, clustering, regression
-src/scenarios/         (M5) oil-price what-if mapping
+src/scenarios/         oil-price what-if mapping
 src/export/            (M4) JSON for the web app
 scripts/               build_snapshot.py
 data/snapshot/         committed real data + manifest.json
@@ -183,3 +184,10 @@ MIT
 
 > CI: the workflow is staged at [`docs/ci.yml.proposed`](docs/ci.yml.proposed). Move it to
 > `.github/workflows/ci.yml` (needs a token with `workflow` scope, or the GitHub web UI) to enable ruff + pytest on every PR.
+
+## Explorer screenshots (M5)
+
+![Overview](docs/img/ui_m5_desktop_overview.png)
+![Returns with company panel](docs/img/ui_m5_desktop_returns_panel.png)
+![Scenario](docs/img/ui_m5_desktop_scenario.png)
+![Mobile overview](docs/img/ui_m5_mobile_overview.png)

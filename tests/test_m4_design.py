@@ -2,6 +2,8 @@
 
 import json
 
+import pytest
+
 from src.analysis import charts
 from src.analysis.common import RESULTS, ROOT
 from src.export import web
@@ -28,4 +30,18 @@ def test_web_export_copies_results_verbatim():
     for name in web.FILES:
         assert (web.WEB_DATA / name).read_bytes() == (RESULTS / name).read_bytes()
     index = json.loads((web.WEB_DATA / "index.json").read_text())
-    assert set(index["sources"]) == set(web.FILES)
+    assert set(index["sources"]) == {*web.FILES, "timeseries.json"}
+
+
+def test_timeseries_export_shape_and_values():
+    import numpy as np
+
+    from src.analysis.common import daily_returns
+
+    ts = web.timeseries()
+    n = len(ts["dates"])
+    assert all(len(v) == n for v in ts["segments"].values())
+    assert all(len(v) == n for v in ts["symbols"].values())
+    # XOM index over the full sample equals compounded daily returns
+    r = daily_returns()["XOM"].fillna(0)
+    assert ts["symbols"]["XOM"][-1] == pytest.approx(100 * np.prod(1 + r), abs=0.01)
