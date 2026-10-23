@@ -38,7 +38,9 @@ class Spec:
 SPECS = {
     "crude_production_us": Spec("monthly", "kb/d", 3_000, 25_000, 200),
     "crude_stocks_us": Spec("weekly", "kbbl", 150_000, 800_000, 30),
-    "rotary_rigs_us": Spec("monthly", "rigs", 50, 5_000, 200),
+    # EIA's mirror of the Baker Hughes count lags by many months (latest was 2026-02 when this
+    # pipeline was built), so its staleness guard is looser; the app shows its latest period.
+    "rotary_rigs_us": Spec("monthly", "rigs", 50, 5_000, 400),
 }
 COLUMNS = ["name", "series", "period", "date", "value", "units"]
 
