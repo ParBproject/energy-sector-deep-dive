@@ -1,0 +1,219 @@
+{
+  "features": [
+    "oil_beta",
+    "capex_intensity",
+    "reinvestment_rate",
+    "fcf_yield",
+    "debt_to_capital",
+    "payout_ratio"
+  ],
+  "n_companies": 18,
+  "silhouette_by_k": {
+    "kmeans": {
+      "2": 0.279023,
+      "3": 0.288782,
+      "4": 0.228373,
+      "5": 0.273793,
+      "6": 0.306836
+    },
+    "ward": {
+      "2": 0.279023,
+      "3": 0.288782,
+      "4": 0.228373,
+      "5": 0.273793,
+      "6": 0.306836
+    }
+  },
+  "best_k": {
+    "kmeans": 6,
+    "ward": 6
+  },
+  "k5": {
+    "kmeans": {
+      "silhouette": 0.273793,
+      "adjusted_rand_vs_segments": 0.612312,
+      "assignments": {
+        "XOM": 3,
+        "CVX": 3,
+        "COP": 1,
+        "EOG": 2,
+        "DVN": 2,
+        "FANG": 2,
+        "OXY": 2,
+        "APA": 2,
+        "KMI": 0,
+        "WMB": 4,
+        "OKE": 0,
+        "ET": 0,
+        "MPC": 0,
+        "VLO": 3,
+        "PSX": 3,
+        "SLB": 1,
+        "HAL": 1,
+        "BKR": 1
+      }
+    },
+    "ward": {
+      "silhouette": 0.273793,
+      "adjusted_rand_vs_segments": 0.612312,
+      "assignments": {
+        "XOM": 1,
+        "CVX": 1,
+        "COP": 2,
+        "EOG": 3,
+        "DVN": 3,
+        "FANG": 3,
+        "OXY": 3,
+        "APA": 3,
+        "KMI": 0,
+        "WMB": 4,
+        "OKE": 0,
+        "ET": 0,
+        "MPC": 0,
+        "VLO": 1,
+        "PSX": 1,
+        "SLB": 2,
+        "HAL": 2,
+        "BKR": 2
+      }
+    }
+  },
+  "silhouette_of_true_segments": 0.096861,
+  "imputed_cells": {
+    "capex_intensity": [
+      "APA",
+      "COP",
+      "PSX",
+      "VLO"
+    ],
+    "reinvestment_rate": [
+      "COP",
+      "PSX",
+      "VLO"
+    ],
+    "fcf_yield": [
+      "COP",
+      "PSX",
+      "VLO"
+    ],
+    "payout_ratio": [
+      "APA",
+      "ET",
+      "FANG"
+    ]
+  },
+  "n_imputed_cells": 13,
+  "complete_case": {
+    "n_companies": 12,
+    "dropped": [
+      "APA",
+      "COP",
+      "ET",
+      "FANG",
+      "PSX",
+      "VLO"
+    ],
+    "kmeans_k5_adjusted_rand": 0.764286
+  },
+  "imputation": "universe median per feature, flagged; then z-scored",
+  "pca": {
+    "explained_variance_ratio": [
+      0.362151,
+      0.346065
+    ],
+    "coords": {
+      "XOM": [
+        -1.404523,
+        -1.366273
+      ],
+      "CVX": [
+        -1.503553,
+        -1.189397
+      ],
+      "COP": [
+        -0.250725,
+        0.375127
+      ],
+      "EOG": [
+        0.905742,
+        0.334904
+      ],
+      "DVN": [
+        1.313084,
+        1.815609
+      ],
+      "FANG": [
+        -0.234943,
+        2.562706
+      ],
+      "OXY": [
+        2.383115,
+        1.625114
+      ],
+      "APA": [
+        0.220287,
+        2.748158
+      ],
+      "KMI": [
+        0.526496,
+        -1.196264
+      ],
+      "WMB": [
+        3.895844,
+        -2.485889
+      ],
+      "OKE": [
+        0.504301,
+        -0.513923
+      ],
+      "ET": [
+        0.69761,
+        -0.593163
+      ],
+      "MPC": [
+        -0.717517,
+        -1.424707
+      ],
+      "VLO": [
+        -1.167425,
+        -1.149033
+      ],
+      "PSX": [
+        -0.66001,
+        -1.112589
+      ],
+      "SLB": [
+        -2.382451,
+        0.530913
+      ],
+      "HAL": [
+        -0.912857,
+        0.790979
+      ],
+      "BKR": [
+        -1.212473,
+        0.247728
+      ]
+    },
+    "segment": {
+      "XOM": "majors",
+      "CVX": "majors",
+      "COP": "majors",
+      "EOG": "upstream",
+      "DVN": "upstream",
+      "FANG": "upstream",
+      "OXY": "upstream",
+      "APA": "upstream",
+      "KMI": "midstream",
+      "WMB": "midstream",
+      "OKE": "midstream",
+      "ET": "midstream",
+      "MPC": "refiners",
+      "VLO": "refiners",
+      "PSX": "refiners",
+      "SLB": "services",
+      "HAL": "services",
+      "BKR": "services"
+    }
+  }
+}
