@@ -1,0 +1,118 @@
+name: EIA refresh
+# Weekly pull of the EIA series used by the deep dive -> validated snapshot commit on main
+# -> regenerated results -> rebuilt explorer on gh-pages. See README "Live EIA data".
+on:
+  schedule:
+    - cron: "30 15 * * 4" # Thursdays 15:30 UTC, after EIA's Wednesday WPSR release
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "src/data/eia*.py"
+      - "scripts/refresh_eia.py"
+      - ".github/workflows/eia-refresh.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eia-refresh
+  cancel-in-progress: false
+
+jobs:
+  # On PRs: live fetch + validate into a scratch dir (no commit, no deploy), uploaded for review.
+  preview:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Fetch + validate EIA (scratch dir)
+        env:
+          EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/eia"
+          cp data/snapshot/eia* "$RUNNER_TEMP/eia/" 2>/dev/null || true
+          python -m scripts.refresh_eia --out "$RUNNER_TEMP/eia"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eia-preview
+          path: ${{ runner.temp }}/eia/
+
+  refresh:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # commit the snapshot to main and push gh-pages
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: pip install -r requirements-dev.txt
+
+      - name: Fetch + validate EIA (all-or-nothing)
+        env:
+          EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+        run: python -m scripts.refresh_eia
+
+      - name: Regenerate results, README and explorer data from the new snapshot
+        run: |
+          python -m scripts.run_m2
+          python -m scripts.run_m3
+          python -m src.export.web
+
+      - name: Tests against the refreshed snapshot (gate before commit)
+        run: |
+          ruff check .
+          ruff format --check .
+          pytest -q
+          cd web && npm ci && npm test && npm run build
+
+      - name: Commit snapshot to main
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/snapshot results README.md web/public/data notebooks docs
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No data change since the last snapshot; nothing committed." >> "$GITHUB_STEP_SUMMARY"
+          else
+            AS_OF=$(python -c "import json;print(json.load(open('data/snapshot/eia_meta.json'))['as_of'])")
+            git commit -m "data: EIA refresh, data as of ${AS_OF}"
+            git push origin HEAD:main
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Committed $(git rev-parse HEAD) to main (data as of ${AS_OF})." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Deploy explorer to gh-pages
+        run: |
+          SRC=$(git rev-parse --short HEAD)
+          cp web/dist/index.html web/dist/404.html
+          touch web/dist/.nojekyll
+          git fetch origin gh-pages
+          git worktree add "$RUNNER_TEMP/pages" origin/gh-pages
+          cd "$RUNNER_TEMP/pages"
+          git rm -rq . && git clean -fdxq
+          cp -a "$GITHUB_WORKSPACE/web/dist/." .
+          git add -A
+          if git diff --cached --quiet; then
+            echo "gh-pages already up to date." >> "$GITHUB_STEP_SUMMARY"
+          else
+            git commit -m "Deploy explorer (EIA refresh, main ${SRC})"
+            git push origin HEAD:gh-pages
+            echo "Deployed main ${SRC} to gh-pages." >> "$GITHUB_STEP_SUMMARY"
+          fi
