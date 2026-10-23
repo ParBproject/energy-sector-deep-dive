@@ -19,11 +19,10 @@ log = logging.getLogger(__name__)
 SOURCE = "edgar"
 TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 FACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"
-# SEC asks for a descriptive User-Agent with contact info; override via SEC_USER_AGENT.
-USER_AGENT = os.environ.get(
-    "SEC_USER_AGENT",
-    "ParBproject energy-sector-deep-dive githubproproject@proton.me",
-)
+# SEC asks for a descriptive User-Agent ("Name email"). Read from env SEC_USER_AGENT
+# (an Actions secret in CI); documented fallback is the project contact below.
+FALLBACK_USER_AGENT = "Par Bahrae githubproproject@proton.me"
+USER_AGENT = os.environ.get("SEC_USER_AGENT") or FALLBACK_USER_AGENT
 
 # us-gaap tags. Companies tag the same line item differently, so each metric has a
 # fallback list (see src/analysis/fundamentals.py::METRIC_TAGS).

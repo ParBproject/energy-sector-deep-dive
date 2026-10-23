@@ -6,6 +6,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      # Contact for SEC EDGAR requests (repo secret); code falls back to a documented default.
+      SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+      # Read by src/data/eia.py; tests unset it (offline), the snapshot refresh uses it.
+      EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
     strategy:
       matrix:
         python-version: ["3.12", "3.13"]
