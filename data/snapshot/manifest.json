@@ -1,5 +1,5 @@
 {
-  "built_at": "2026-10-23T00:49:53+00:00",
+  "built_at": "2026-10-23T00:56:26+00:00",
   "start": "2015-01-01",
   "sources": {
     "yfinance": {
@@ -95,7 +95,7 @@
         "XOM"
       ],
       "missing": [],
-      "rows": 17329
+      "rows": 25197
     },
     "famafrench": {
       "ok": true,

@@ -25,19 +25,36 @@ USER_AGENT = os.environ.get(
     "ParBproject energy-sector-deep-dive githubproproject@proton.me",
 )
 
+# us-gaap tags. Companies tag the same line item differently, so each metric has a
+# fallback list (see src/analysis/fundamentals.py::METRIC_TAGS).
 CONCEPTS = [
     "Revenues",
     "RevenueFromContractWithCustomerExcludingAssessedTax",
+    "RevenueFromContractWithCustomerIncludingAssessedTax",
     "NetIncomeLoss",
     "Assets",
     "StockholdersEquity",
+    "PartnersCapital",
     "LongTermDebt",
     "LongTermDebtNoncurrent",
+    "LongTermDebtCurrent",
+    "DebtCurrent",
+    "LongTermDebtAndCapitalLeaseObligations",
+    "LongTermDebtAndCapitalLeaseObligationsIncludingCurrentMaturities",
     "NetCashProvidedByUsedInOperatingActivities",
     "PaymentsToAcquirePropertyPlantAndEquipment",
+    "PaymentsToAcquireProductiveAssets",
+    "PaymentsToAcquireOilAndGasPropertyAndEquipment",
+    "PaymentsToAcquireOilAndGasProperty",
+    "PaymentsToExploreAndDevelopOilAndGasProperties",
     "PaymentsOfDividends",
+    "PaymentsOfDividendsCommonStock",
+    "PaymentsOfOrdinaryDividends",
+    "DistributionMadeToLimitedPartnerCashDistributionsPaid",
     "PaymentsForRepurchaseOfCommonStock",
+    "PaymentsForRepurchaseOfEquity",
 ]
+DEI_CONCEPTS = ["EntityCommonStockSharesOutstanding"]
 FORMS = {"10-K", "10-Q", "10-K/A", "10-Q/A"}
 
 
@@ -62,9 +79,11 @@ def ticker_to_cik() -> dict[str, int]:
 
 def flatten_facts(payload: dict, ticker: str, concepts=CONCEPTS) -> pd.DataFrame:
     rows = []
-    gaap = payload.get("facts", {}).get("us-gaap", {})
-    for concept in concepts:
-        for unit, facts in gaap.get(concept, {}).get("units", {}).items():
+    all_facts = payload.get("facts", {})
+    pairs = [("us-gaap", c) for c in concepts] + [("dei", c) for c in DEI_CONCEPTS]
+    for taxonomy, concept in pairs:
+        node = all_facts.get(taxonomy, {}).get(concept, {})
+        for unit, facts in node.get("units", {}).items():
             for f in facts:
                 if f.get("form") not in FORMS:
                     continue
@@ -119,3 +138,9 @@ def as_of(facts: pd.DataFrame, when: str) -> pd.DataFrame:
     keys = ["ticker", "concept", "unit", "start", "end"]
     f = f.drop_duplicates(subset=keys, keep="last")
     return f.sort_values(["ticker", "concept", "end"]).reset_index(drop=True)
+
+
+def ticker_to_cik_offline(facts: pd.DataFrame) -> dict[str, int]:
+    """Current registrant per ticker from a facts frame: the CIK with the latest filing."""
+    last = facts.sort_values("filed").groupby("ticker")["cik"].last()
+    return {t: int(c) for t, c in last.items()}

@@ -13,3 +13,10 @@ select = ["E", "F", "I", "B", "UP"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.ruff.lint.per-file-ignores]
+"notebooks/*" = ["E401", "E402", "E501", "F401", "I001"]
+"scripts/make_notebooks.py" = ["E501"]
+
+[tool.ruff.format]
+exclude = ["notebooks/*"]
