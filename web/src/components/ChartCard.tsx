@@ -6,10 +6,10 @@ interface Props {
   id: string;
   title: string;
   description?: string;
-  source: string;
+  source?: string;
   asOf?: string;
   loading?: boolean;
-  span?: 4 | 6 | 8 | 12;
+  span?: 4 | 5 | 6 | 7 | 8 | 12;
   children?: ReactNode;
 }
 
@@ -32,7 +32,7 @@ export function ChartCard({ id, title, description, source, asOf, loading, span 
       {description && <p className="desc">{description}</p>}
       {loading ? <Skeleton /> : children}
       <footer className="stamp">
-        <span>Source: {source}</span>
+        <span>Source: {source ?? "…"}</span>
         {asOf && <span className="num">As of {asOf}</span>}
       </footer>
     </motion.article>

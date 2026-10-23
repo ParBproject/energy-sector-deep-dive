@@ -2,9 +2,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// Relative base so the build works from GitHub Pages project paths.
+// GitHub Pages project path: https://parbproject.github.io/energy-sector-deep-dive/
 export default defineConfig({
-  base: "./",
+  base: "/energy-sector-deep-dive/",
   plugins: [react()],
   build: { chunkSizeWarningLimit: 1200 },
   test: { environment: "node", include: ["tests/**/*.test.ts"] },
