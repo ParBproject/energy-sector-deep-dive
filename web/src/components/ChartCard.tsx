@@ -10,6 +10,8 @@ interface Props {
   asOf?: string;
   loading?: boolean;
   span?: 4 | 5 | 6 | 7 | 8 | 12;
+  /** Replaces the Source / As-of footer with one provenance line (used by EIA charts). */
+  stamp?: string;
   children?: ReactNode;
 }
 
@@ -17,7 +19,7 @@ export function Skeleton({ label = "Loading chart" }: { label?: string }) {
   return <div className="skeleton" role="status" aria-label={label} />;
 }
 
-export function ChartCard({ id, title, description, source, asOf, loading, span = 6, children }: Props) {
+export function ChartCard({ id, title, description, source, asOf, loading, span = 6, stamp, children }: Props) {
   const reduced = useReducedMotion();
   return (
     <m.article
@@ -32,8 +34,14 @@ export function ChartCard({ id, title, description, source, asOf, loading, span 
       {description && <p className="desc">{description}</p>}
       {loading ? <Skeleton /> : children}
       <footer className="stamp">
-        <span>Source: {source ?? "…"}</span>
-        {asOf && <span className="num">As of {asOf}</span>}
+        {stamp ? (
+          <span className="num" data-testid="eia-stamp">{stamp}</span>
+        ) : (
+          <>
+            <span>Source: {source ?? "…"}</span>
+            {asOf && <span className="num">As of {asOf}</span>}
+          </>
+        )}
       </footer>
     </m.article>
   );

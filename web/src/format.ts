@@ -26,3 +26,6 @@ export const pct = (x: number | null | undefined, d = 1) => (x == null ? "n/a" :
 export const signed = (x: number, d = 1) => `${x >= 0 ? "+" : ""}${x.toFixed(d)}%`;
 export const usdBn = (x: number | null | undefined) =>
   x == null ? "n/a" : `$${(x / 1e9).toLocaleString("en-US", { maximumFractionDigits: x < 1e10 ? 1 : 0 })}bn`;
+
+/** Stamp shown on every EIA chart; the date comes from data/snapshot/eia_meta.json via eia.json. */
+export const eiaStamp = (e: { as_of: string }) => `Data as of ${e.as_of} · Source: U.S. EIA`;

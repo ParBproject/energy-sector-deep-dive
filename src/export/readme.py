@@ -11,6 +11,22 @@ def _pct(x):
     return "n/a" if x is None else f"{x * 100:.1f}%"
 
 
+def _topdown_line(td: dict) -> str:
+    if not td["available"]:
+        return (
+            f"- The top-down size (US output x WTI) is **not computed**: it needs "
+            f"{td['requires']} ({td['reason']})."
+        )
+    return (
+        f"- Top-down: US field crude output in {td['year']} was "
+        f"{td['us_crude_production_avg_kbd']:,.0f} kb/d "
+        f"({td['us_crude_production_bbl'] / 1e9:.2f}bn bbl), worth "
+        f"**${td['us_crude_value_usd'] / 1e9:,.0f}bn** at monthly average WTI "
+        f"(EIA MCRFPUS2 x FRED DCOILWTICO; EIA data as of {td['eia_as_of']}). "
+        + " ".join(td["caveats"])
+    )
+
+
 def render() -> str:
     sz, rt, fd = (read_json(n) for n in ("market_sizing.json", "returns.json", "fundamentals.json"))
     lab = segment_labels()
@@ -62,8 +78,7 @@ def render() -> str:
         "### Market sizing (proxy)",
         "![Segment revenue](docs/img/segment_revenue.png)",
         "",
-        f"- The top-down size (US output x WTI) is **not computed**: it needs "
-        f"{sz['topdown_status']['requires']} ({sz['topdown_status']['reason']}).",
+        _topdown_line(sz["topdown_status"]),
         f"- Bottom-up proxy: the universe reported **${total:,.0f}bn** of FY{y} revenue "
         f"({sz['companies_reporting_by_year'][y]} of {fd['universe_size']} companies; missing: "
         f"{', '.join(sz['missing_revenue_latest_year']) or 'none'}). Average WTI in {y}: "

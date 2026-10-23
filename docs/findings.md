@@ -60,7 +60,7 @@ The same-week result shows the exposures are stable. The lagged result is the ho
 
 ## 5. Market sizing (proxy)
 
-The 18 names reported **$1,278bn** of FY2025 revenue (17 of 18 companies; APA has no standard revenue tag). This is a measure of the scale of cash flows, not a market size. It is global and consolidated, it double counts along the chain (refiners buy producers' crude), and it includes pass-through product sales. The top-down figure (US production × WTI) was not computed, because it needs an EIA key that the snapshot does not have.
+The 18 names reported **$1,278bn** of FY2025 revenue (17 of 18 companies; APA has no standard revenue tag). This is a measure of the scale of cash flows, not a market size. It is global and consolidated, it double counts along the chain (refiners buy producers' crude), and it includes pass-through product sales. The top-down figure (US crude production × WTI) is computed from the weekly-refreshed EIA snapshot; its current value is generated into the README's Findings section rather than typed here, so it never goes stale.
 
 ## Limitations, stated plainly
 

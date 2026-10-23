@@ -290,3 +290,16 @@ export function sizingOption(d: AllData, segs: Segment[]): EChartsCoreOption {
     series: segs.map((s) => ({ name: SEGMENT_LABELS[s], type: "bar", stack: "rev", itemStyle: { color: c.segment[s] }, data: years.map((y) => +((d.sizing.segment_revenue_usd[s][y] ?? 0) / 1e9).toFixed(1)) })),
   };
 }
+
+/** One EIA series as a line (stocks weekly, production and rigs monthly). */
+export function eiaLineOption(d: AllData, name: string): EChartsCoreOption {
+  const s = d.eia.series[name];
+  const fmt = (v: unknown) => `${Number(v).toLocaleString("en-US", { maximumFractionDigits: 1 })} ${s.units}`;
+  return {
+    tooltip: { trigger: "axis", valueFormatter: fmt },
+    grid: { top: 16, bottom: 28, left: 56, right: 12 },
+    xAxis: { type: "category", data: s.dates, boundaryGap: false, axisLabel: { ...mono, hideOverlap: true } },
+    yAxis: { type: "value", scale: true, axisLabel: { ...mono } },
+    series: [{ name: s.label, type: "line", data: s.values, showSymbol: false, lineStyle: { color: c.accent, width: 1.6 }, itemStyle: { color: c.accent }, areaStyle: { color: "rgba(16,185,129,0.08)" } }],
+  };
+}

@@ -1,10 +1,13 @@
 """Market sizing from what the snapshot actually has.
 
-The textbook top-down size (US crude output x WTI) needs a production volume series. EIA is
-unavailable (no ``EIA_API_KEY``) and the FRED snapshot holds prices, rates and indices but no
-production volumes, so this module does NOT fabricate one. Instead it reports a bottom-up
-proxy: summed reported revenue by segment from point-in-time 10-K filings, and states the
-gaps (double counting along the value chain, global not US-only revenue, missing tags).
+Two views:
+
+* Top-down: US field crude production (EIA ``MCRFPUS2``, from the committed EIA snapshot that
+  ``scripts/refresh_eia.py`` refreshes weekly) x the monthly average WTI spot price (FRED
+  ``DCOILWTICO``), summed over the calendar year. Computed only when all 12 months of
+  production are in the snapshot; otherwise reported as unavailable, never estimated.
+* Bottom-up proxy: summed reported revenue by segment from point-in-time 10-K filings, with the
+  gaps stated (double counting along the value chain, global not US-only revenue, missing tags).
 """
 
 from __future__ import annotations
@@ -13,9 +16,44 @@ import pandas as pd
 
 from src.analysis.common import SEGMENT_ORDER, as_of_date, segment_map
 from src.analysis.fundamentals import METRIC_TAGS, annual_facts
-from src.data import snapshot
+from src.data import eia_snapshot, snapshot
 
 TOPDOWN_REQUIRES = "US crude oil field production volume (EIA PET MCRFPUS2), not in snapshot"
+
+
+def topdown(year: int, wti: pd.DataFrame) -> dict:
+    """US crude output value for ``year``: sum over months of kb/d x 1000 x days x avg WTI."""
+    m = eia_snapshot.meta()
+    try:
+        prod = eia_snapshot.series("crude_production_us")
+    except FileNotFoundError:
+        return {"available": False, "requires": TOPDOWN_REQUIRES, "reason": "no EIA snapshot"}
+    prod = prod[prod.index.year == year]
+    w = wti.set_index("date")["value"]
+    w = w[w.index.year == year].resample("MS").mean()
+    if len(prod) < 12 or w.reindex(prod.index).isna().any():
+        return {
+            "available": False,
+            "requires": TOPDOWN_REQUIRES,
+            "reason": f"only {len(prod)} of 12 months of {year} production in the EIA snapshot",
+        }
+    days = pd.Series(prod.index.days_in_month, index=prod.index)
+    barrels = prod * 1000 * days
+    value = (barrels * w.reindex(prod.index)).sum()
+    return {
+        "available": True,
+        "year": year,
+        "method": "sum over months of EIA MCRFPUS2 (kb/d) x 1000 x days x mean FRED DCOILWTICO",
+        "us_crude_production_bbl": float(barrels.sum()),
+        "us_crude_production_avg_kbd": float(barrels.sum() / days.sum() / 1000),
+        "us_crude_value_usd": float(value),
+        "eia_as_of": m["as_of"],
+        "caveats": [
+            "Wellhead value at WTI Cushing spot; realized prices differ by grade and basin.",
+            "Crude only: excludes natural gas, NGLs and refined products.",
+            "Production for recent months is EIA's estimate and is revised in later releases.",
+        ],
+    }
 
 
 def revenue_by_year(when: str | None = None) -> pd.DataFrame:
@@ -55,15 +93,12 @@ def compute(when: str | None = None) -> dict:
     fred = snapshot.fred()
     wti = fred[fred["series_id"] == "DCOILWTICO"]
     wti_year = wti[wti["date"].dt.year == latest_year]["value"].mean()
+    td = topdown(latest_year, wti)
     return {
         "as_of": when,
         "latest_fiscal_year": latest_year,
         "approach": "bottom-up: summed reported revenue by segment (10-K, point-in-time)",
-        "topdown_status": {
-            "available": False,
-            "requires": TOPDOWN_REQUIRES,
-            "reason": "EIA_API_KEY not set; FRED snapshot has no production volume series",
-        },
+        "topdown_status": td,
         "segment_revenue_usd": by_seg,
         "total_revenue_latest_usd": total_latest,
         "segment_share_latest": {s: by_seg[s][latest_year] / total_latest for s in SEGMENT_ORDER},
