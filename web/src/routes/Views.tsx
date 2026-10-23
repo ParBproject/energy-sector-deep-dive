@@ -6,7 +6,7 @@ import * as O from "../charts/options";
 import { scenarioAt } from "../data/derive";
 import type { AllData } from "../data/types";
 import { tokens, type Segment } from "../design/tokens";
-import { SEGMENT_LABELS, signed, usdBn } from "../format";
+import { SEGMENT_LABELS, eiaStamp, signed, usdBn } from "../format";
 import { useStore } from "../state/store";
 
 function useCommon() {
@@ -15,6 +15,11 @@ function useCommon() {
   return { ...st, focus, src: st.data?.index.sources ?? {}, asOf: st.data?.index.as_of };
 }
 
+const EIA_CARDS: [string, string][] = [
+  ["crude_production_us", "EIA series MCRFPUS2, monthly."],
+  ["crude_stocks_us", "EIA series WCESTUS1, weekly."],
+  ["rotary_rigs_us", "EIA series E_ERTRRO_XR0_NUS_C (Baker Hughes via EIA), monthly; EIA publishes it with a lag of several months."],
+];
 const HERO_DESC = "Weekly total-return index (log scale). Drag the handles or pinch to re-scope every view to a date range.";
 /** Placeholder with the same card copy as the real view, so the first paint already shows the headline content. */
 const Loading = ({ title, view }: { title: string; view?: string }) => (
@@ -32,6 +37,9 @@ export function Overview({ d }: { d: AllData }) {
   const hero = useMemo(() => O.heroOption(d, segments, range, focus), [d, segments, range, focus]);
   const beta = useMemo(() => O.oilBetaOption(d, segments, focus), [d, segments, focus]);
   const size = useMemo(() => O.sizingOption(d, segments), [d, segments]);
+  const eiaOpts = useMemo(() => EIA_CARDS.map(([n]) => O.eiaLineOption(d, n)), [d]);
+  const stamp = eiaStamp(d.eia);
+  const td = d.sizing.topdown_status;
   return (
     <>
       <KpiStrip data={d} />
@@ -45,6 +53,15 @@ export function Overview({ d }: { d: AllData }) {
         <ChartCard id="sizing" span={6} title="Reported revenue by segment" description={`A bottom-up proxy, not a market size: FY${d.sizing.latest_fiscal_year} total ${usdBn(d.sizing.total_revenue_latest_usd)}. Global revenue, double counts the value chain.`} source={src["market_sizing.json"]} asOf={asOf}>
           <EChart option={size} label="Stacked bar chart of revenue by segment and year" />
         </ChartCard>
+        {EIA_CARDS.map(([n, desc], i) => {
+          const s = d.eia.series[n];
+          const extra = n === "crude_production_us" && td.available ? ` ${td.year} average ${Math.round(td.us_crude_production_avg_kbd!).toLocaleString("en-US")} kb/d, worth ${usdBn(td.us_crude_value_usd!)} at WTI.` : "";
+          return (
+            <ChartCard key={n} id={`eia-${n}`} span={4} title={s.label} description={`${desc} Latest: ${s.latest_period}, ${s.values[s.values.length - 1].toLocaleString("en-US")} ${s.units}.${extra}`} stamp={stamp}>
+              <EChart option={eiaOpts[i]} label={`Line chart of ${s.label}`} />
+            </ChartCard>
+          );
+        })}
       </div>
     </>
   );

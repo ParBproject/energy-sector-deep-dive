@@ -8,15 +8,17 @@
     "clustering.json",
     "factor_model.json",
     "scenarios.json",
-    "timeseries.json"
+    "timeseries.json",
+    "eia.json"
   ],
   "sources": {
-    "market_sizing.json": "SEC EDGAR 10-K XBRL (point-in-time)",
+    "market_sizing.json": "SEC EDGAR 10-K XBRL (point-in-time); top-down: U.S. EIA x FRED WTI",
     "returns.json": "yfinance adjusted closes",
     "fundamentals.json": "SEC EDGAR 10-K XBRL + yfinance",
     "clustering.json": "derived: results/returns.json + fundamentals.json",
     "factor_model.json": "yfinance, FRED DGS10, Fama-French",
     "scenarios.json": "yfinance, Fama-French, commodity-price-forecaster (vendored)",
-    "timeseries.json": "yfinance adjusted closes, weekly total-return index"
+    "timeseries.json": "yfinance adjusted closes, weekly total-return index",
+    "eia.json": "U.S. EIA API v2 (MCRFPUS2, WCESTUS1, E_ERTRRO_XR0_NUS_C)"
   }
 }

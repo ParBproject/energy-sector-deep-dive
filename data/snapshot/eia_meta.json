@@ -1,0 +1,41 @@
+{
+  "source": "U.S. EIA",
+  "api": "https://api.eia.gov/v2",
+  "retrieved_at": "2026-10-23T21:33:18+00:00",
+  "as_of": "2026-10-23",
+  "series": {
+    "crude_production_us": {
+      "series_id": "MCRFPUS2",
+      "route": "petroleum/crd/crpdn/data",
+      "description": "US field crude production (kb/d, monthly)",
+      "frequency": "monthly",
+      "units": "MBBL/D",
+      "rows": 139,
+      "first_period": "2015-01",
+      "latest_period": "2026-07",
+      "latest_value": 13948.0
+    },
+    "crude_stocks_us": {
+      "series_id": "WCESTUS1",
+      "route": "petroleum/stoc/wstk/data",
+      "description": "US commercial crude stocks ex-SPR (kbbl, weekly)",
+      "frequency": "weekly",
+      "units": "MBBL",
+      "rows": 616,
+      "first_period": "2015-01-02",
+      "latest_period": "2026-10-16",
+      "latest_value": 412517.0
+    },
+    "rotary_rigs_us": {
+      "series_id": "E_ERTRRO_XR0_NUS_C",
+      "route": "petroleum/crd/drill/data",
+      "description": "US crude+gas rotary rigs (monthly; Baker Hughes via EIA)",
+      "frequency": "monthly",
+      "units": "COUNT",
+      "rows": 134,
+      "first_period": "2015-01",
+      "latest_period": "2026-02",
+      "latest_value": 409.0
+    }
+  }
+}
