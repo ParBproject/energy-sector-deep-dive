@@ -1,12 +1,12 @@
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
+import { lazy, startTransition, Suspense, useEffect, useRef, useState } from "react";
 import { CompanyPanel } from "./components/CompanyPanel";
 import { FilterBar } from "./components/FilterBar";
 import { loadAll } from "./data/load";
 import { tokens } from "./design/tokens";
 import { VIEW_LABELS } from "./format";
-import { Styleguide } from "./routes/Styleguide";
 import { Clusters, Factors, FundamentalsView, Loading, Overview, Returns, Scenario } from "./routes/Views";
+const Styleguide = lazy(() => import("./routes/Styleguide").then((m) => ({ default: m.Styleguide })));
 import { startUrlSync, urlStateOf, useStore } from "./state/store";
 import { serialize, VIEWS, type View } from "./state/url";
 
@@ -60,6 +60,11 @@ function useSwipe(el: React.RefObject<HTMLElement | null>, view: View, setView: 
 export function App() {
   const { data, error, view, setView, setData, setError } = useStore();
   const reduced = useReducedMotion();
+  /** Mount the chart-heavy views in a transition so React can yield (keeps long tasks short). */
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    if (data) startTransition(() => setReady(true));
+  }, [data]);
   const main = useRef<HTMLElement>(null);
   useEffect(() => startUrlSync(), []);
   useEffect(() => {
@@ -70,7 +75,7 @@ export function App() {
     document.title = `${view === "styleguide" ? "Styleguide" : VIEW_LABELS[view]} · Energy Sector Explorer`;
   }, [view]);
 
-  if (view === "styleguide") return <Styleguide />;
+  if (view === "styleguide") return <Suspense fallback={null}><Styleguide /></Suspense>;
   const ViewC = VIEW_COMPONENTS[view];
   return (
     <>
@@ -90,7 +95,7 @@ export function App() {
       <main id="main" className="container" ref={main}>
         {error && <p role="alert">Could not load data: {error}</p>}
         <AnimatePresence mode="wait" initial={false}>
-          <motion.section
+          <m.section
             key={view}
             aria-label={VIEW_LABELS[view]}
             initial={reduced ? false : { opacity: 0, y: 6 }}
@@ -98,8 +103,8 @@ export function App() {
             exit={reduced ? { opacity: 1 } : { opacity: 0, y: -6 }}
             transition={{ duration: reduced ? 0 : tokens.motion.fast }}
           >
-            {data ? <ViewC d={data} /> : <Loading title={VIEW_LABELS[view]} />}
-          </motion.section>
+            {data && ready ? <ViewC d={data} /> : <Loading title={VIEW_LABELS[view]} view={view} />}
+          </m.section>
         </AnimatePresence>
         <footer className="foot">
           Sensitivity analysis and descriptive statistics only; nothing here is a trading signal. Data: yfinance, FRED, SEC EDGAR, Fama-French; snapshot {data?.index.snapshot_built_at.slice(0, 10) ?? "…"}.

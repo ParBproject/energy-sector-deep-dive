@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { tokens } from "../design/tokens";
 
@@ -20,7 +20,7 @@ export function Skeleton({ label = "Loading chart" }: { label?: string }) {
 export function ChartCard({ id, title, description, source, asOf, loading, span = 6, children }: Props) {
   const reduced = useReducedMotion();
   return (
-    <motion.article
+    <m.article
       id={id}
       className={`card span-${span}`}
       aria-labelledby={`${id}-title`}
@@ -28,13 +28,13 @@ export function ChartCard({ id, title, description, source, asOf, loading, span 
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: tokens.motion.base, ease: tokens.motion.ease as [number, number, number, number] }}
     >
-      <h3 id={`${id}-title`}>{title}</h3>
+      <h2 id={`${id}-title`}>{title}</h2>
       {description && <p className="desc">{description}</p>}
       {loading ? <Skeleton /> : children}
       <footer className="stamp">
         <span>Source: {source ?? "…"}</span>
         {asOf && <span className="num">As of {asOf}</span>}
       </footer>
-    </motion.article>
+    </m.article>
   );
 }

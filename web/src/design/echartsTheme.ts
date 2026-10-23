@@ -1,4 +1,3 @@
-import * as echarts from "echarts/core";
 import { tokens } from "./tokens";
 
 const c = tokens.color;
@@ -30,6 +29,4 @@ export const echartsTheme = {
   line: { symbol: "none", lineStyle: { width: 2 } },
 };
 
-export function registerTheme(): void {
-  echarts.registerTheme(THEME_NAME, echartsTheme);
-}
+

@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { createPortal } from "react-dom";
 import { SEGMENTS, tokens } from "../design/tokens";
 import { SEGMENT_LABELS } from "../format";
@@ -15,6 +15,21 @@ function Chips() {
         </button>
       ))}
     </>
+  );
+}
+
+/** Keyboard/screen-reader path to the company drill-down (charts are canvas). */
+function CompanyPicker({ className }: { className?: string }) {
+  const { data, company, selectCompany, segments } = useStore();
+  const tickers = Object.entries(data?.returns.betas.companies ?? {}).filter(([, v]) => segments.includes(v.segment)).map(([t]) => t).sort();
+  return (
+    <label className={`picker ${className ?? ""}`}>
+      <span className="sr-only">Open company detail</span>
+      <select value={company ?? ""} onChange={(e) => selectCompany(e.target.value || null)}>
+        <option value="">Company…</option>
+        {tickers.map((t) => <option key={t} value={t}>{t}</option>)}
+      </select>
+    </label>
   );
 }
 
@@ -49,6 +64,7 @@ export function FilterBar({ asOf }: { asOf?: string }) {
           <Chips />
           <Context />
         </span>
+        <CompanyPicker className="only-desktop" />
         <button className="btn only-mobile" onClick={() => setSheet(true)} aria-haspopup="dialog">
           Filters <span className="badge num">{segments.length}/5{extra ? ` +${extra}` : ""}</span>
         </button>
@@ -58,8 +74,8 @@ export function FilterBar({ asOf }: { asOf?: string }) {
         <AnimatePresence>
           {sheetOpen && (
             <>
-              <motion.div key="scrim" className="scrim" onClick={() => setSheet(false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
-              <motion.div
+              <m.div key="scrim" className="scrim" onClick={() => setSheet(false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+              <m.div
                 key="sheet"
                 className="sheet"
                 role="dialog"
@@ -77,12 +93,14 @@ export function FilterBar({ asOf }: { asOf?: string }) {
                 <div className="handle" aria-hidden />
                 <div className="label">Segments</div>
                 <div className="chips"><Chips /></div>
+                <div className="label">Company detail</div>
+                <CompanyPicker />
                 {extra > 0 && (<><div className="label">Range &amp; pinned</div><div className="chips"><Context /></div></>)}
                 <div style={{ display: "flex", gap: 8 }}>
                   <button className="btn" onClick={resetSegments}>Reset</button>
                   <button className="btn primary" style={{ flex: 1 }} onClick={() => setSheet(false)}>Show results</button>
                 </div>
-              </motion.div>
+              </m.div>
             </>
           )}
         </AnimatePresence>,

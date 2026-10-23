@@ -15,7 +15,17 @@ function useCommon() {
   return { ...st, focus, src: st.data?.index.sources ?? {}, asOf: st.data?.index.as_of };
 }
 
-const Loading = ({ title }: { title: string }) => <ChartCard id={`ld-${title}`} title={title} source="…" loading span={12} />;
+const HERO_DESC = "Weekly total-return index (log scale). Drag the handles or pinch to re-scope every view to a date range.";
+/** Placeholder with the same card copy as the real view, so the first paint already shows the headline content. */
+const Loading = ({ title, view }: { title: string; view?: string }) => (
+  <div className="loading-view">
+    {view === "overview" ? (
+      <div className="grid12 cards"><ChartCard id="ld-hero" span={12} title="Segments vs XLE and the S&P 500" description={HERO_DESC} source="…" loading /></div>
+    ) : (
+      <ChartCard id={`ld-${title}`} title={title} source="…" loading span={12} />
+    )}
+  </div>
+);
 
 export function Overview({ d }: { d: AllData }) {
   const { segments, range, focus, setRange, selectCompany, src, asOf } = useCommon();
@@ -26,7 +36,7 @@ export function Overview({ d }: { d: AllData }) {
     <>
       <KpiStrip data={d} />
       <div className="grid12 cards">
-        <ChartCard id="hero" span={12} title="Segments vs XLE and the S&P 500" description="Weekly total-return index (log scale). Drag the handles or pinch to re-scope every view to a date range." source={src["timeseries.json"]} asOf={asOf}>
+        <ChartCard id="hero" span={12} title="Segments vs XLE and the S&P 500" description={HERO_DESC} source={src["timeseries.json"]} asOf={asOf}>
           <EChart option={hero} label="Line chart of segment total-return indices" onRange={setRange} group="ts" />
         </ChartCard>
         <ChartCard id="beta" span={6} title="Oil beta by company" description="Daily return per 1% WTI move, 2015 to date. Tap a bar for detail." source={src["returns.json"]} asOf={asOf}>
@@ -128,7 +138,7 @@ export function Scenario({ d }: { d: AllData }) {
         <EChart option={opt} label="Bar chart of expected segment moves with confidence whiskers" />
       </ChartCard>
       <div className="card span-4 side">
-        <h3>Readout</h3>
+        <h2>Readout</h2>
         <table className="ratios">
           <thead><tr><th>Segment</th><th>Expected</th><th>95% band</th></tr></thead>
           <tbody>
