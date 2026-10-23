@@ -1,5 +1,7 @@
 # Energy Sector Deep Dive
 
+[![CI](https://github.com/ParBproject/energy-sector-deep-dive/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ParBproject/energy-sector-deep-dive/actions/workflows/ci.yml)
+
 [![Energy Sector Explorer](docs/img/hero.png)](https://parbproject.github.io/energy-sector-deep-dive/)
 
 **[Open the live explorer →](https://parbproject.github.io/energy-sector-deep-dive/)** · **[Read the findings →](docs/findings.md)**
