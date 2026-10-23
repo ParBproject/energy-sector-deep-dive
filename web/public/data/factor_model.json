@@ -1,0 +1,220 @@
+{
+  "sample": {
+    "first_week": "2015-01-09",
+    "last_week": "2026-08-28",
+    "n_weeks": 608
+  },
+  "factors": [
+    "oil",
+    "gas",
+    "brent_wti",
+    "d10y",
+    "mkt_rf",
+    "smb",
+    "hml"
+  ],
+  "crack_spread_proxy": "weekly change in (Brent - WTI) / WTI from BZ=F and CL=F futures; RBOB/heating-oil futures not in snapshot",
+  "dollar_proxy": "unavailable: no dollar index series in snapshot",
+  "hac_lags": 4,
+  "min_train_weeks": 156,
+  "full_sample": {
+    "majors": {
+      "coef": {
+        "const": -0.000529,
+        "oil": 0.311653,
+        "gas": 0.004522,
+        "brent_wti": 0.303091,
+        "d10y": 0.003528,
+        "mkt_rf": 0.687511,
+        "smb": -0.086024,
+        "hml": 0.79909
+      },
+      "t_hac": {
+        "const": -0.603914,
+        "oil": 9.833999,
+        "gas": 0.462987,
+        "brent_wti": 5.491118,
+        "d10y": 0.364773,
+        "mkt_rf": 13.521797,
+        "smb": -1.041151,
+        "hml": 11.848006
+      },
+      "r2": 0.687157,
+      "n": 608
+    },
+    "upstream": {
+      "coef": {
+        "const": -0.001358,
+        "oil": 0.526783,
+        "gas": 0.028928,
+        "brent_wti": 0.486895,
+        "d10y": 0.008913,
+        "mkt_rf": 0.872235,
+        "smb": 0.273927,
+        "hml": 1.070998
+      },
+      "t_hac": {
+        "const": -1.033118,
+        "oil": 10.210251,
+        "gas": 1.93279,
+        "brent_wti": 4.296969,
+        "d10y": 0.621628,
+        "mkt_rf": 13.245467,
+        "smb": 1.867095,
+        "hml": 12.659005
+      },
+      "r2": 0.690432,
+      "n": 608
+    },
+    "midstream": {
+      "coef": {
+        "const": -0.000459,
+        "oil": 0.241137,
+        "gas": 0.034069,
+        "brent_wti": 0.15284,
+        "d10y": -0.012015,
+        "mkt_rf": 0.858164,
+        "smb": 0.268835,
+        "hml": 0.650043
+      },
+      "t_hac": {
+        "const": -0.401954,
+        "oil": 6.879338,
+        "gas": 2.279023,
+        "brent_wti": 1.670345,
+        "d10y": -0.946549,
+        "mkt_rf": 13.217343,
+        "smb": 2.577856,
+        "hml": 9.471169
+      },
+      "r2": 0.536797,
+      "n": 608
+    },
+    "refiners": {
+      "coef": {
+        "const": 0.001447,
+        "oil": 0.245725,
+        "gas": 5.3e-05,
+        "brent_wti": 0.299041,
+        "d10y": 0.027821,
+        "mkt_rf": 0.937714,
+        "smb": 0.192332,
+        "hml": 0.959487
+      },
+      "t_hac": {
+        "const": 1.093049,
+        "oil": 5.814159,
+        "gas": 0.003278,
+        "brent_wti": 4.113929,
+        "d10y": 2.50094,
+        "mkt_rf": 11.132116,
+        "smb": 1.681285,
+        "hml": 9.728581
+      },
+      "r2": 0.56895,
+      "n": 608
+    },
+    "services": {
+      "coef": {
+        "const": -0.001694,
+        "oil": 0.337208,
+        "gas": -0.004047,
+        "brent_wti": 0.277306,
+        "d10y": 0.016945,
+        "mkt_rf": 0.956126,
+        "smb": 0.260421,
+        "hml": 1.083311
+      },
+      "t_hac": {
+        "const": -1.382787,
+        "oil": 8.51877,
+        "gas": -0.22629,
+        "brent_wti": 4.366738,
+        "d10y": 1.295878,
+        "mkt_rf": 14.756919,
+        "smb": 2.223542,
+        "hml": 12.694641
+      },
+      "r2": 0.653857,
+      "n": 608
+    }
+  },
+  "walk_forward_explanatory": {
+    "majors": {
+      "vs_hist_mean": 0.675667,
+      "vs_zero": 0.675837,
+      "n_oos_weeks": 452,
+      "first_oos_week": "2018-01-05",
+      "last_oos_week": "2026-08-28"
+    },
+    "upstream": {
+      "vs_hist_mean": 0.667807,
+      "vs_zero": 0.667407,
+      "n_oos_weeks": 452,
+      "first_oos_week": "2018-01-05",
+      "last_oos_week": "2026-08-28"
+    },
+    "midstream": {
+      "vs_hist_mean": 0.532627,
+      "vs_zero": 0.533294,
+      "n_oos_weeks": 452,
+      "first_oos_week": "2018-01-05",
+      "last_oos_week": "2026-08-28"
+    },
+    "refiners": {
+      "vs_hist_mean": 0.571386,
+      "vs_zero": 0.573321,
+      "n_oos_weeks": 452,
+      "first_oos_week": "2018-01-05",
+      "last_oos_week": "2026-08-28"
+    },
+    "services": {
+      "vs_hist_mean": 0.64198,
+      "vs_zero": 0.641272,
+      "n_oos_weeks": 452,
+      "first_oos_week": "2018-01-05",
+      "last_oos_week": "2026-08-28"
+    }
+  },
+  "walk_forward_predictive_lag1": {
+    "majors": {
+      "vs_hist_mean": -0.05991,
+      "vs_zero": -0.05931,
+      "n_oos_weeks": 451,
+      "first_oos_week": "2018-01-12",
+      "last_oos_week": "2026-08-28"
+    },
+    "upstream": {
+      "vs_hist_mean": -0.055965,
+      "vs_zero": -0.057286,
+      "n_oos_weeks": 451,
+      "first_oos_week": "2018-01-12",
+      "last_oos_week": "2026-08-28"
+    },
+    "midstream": {
+      "vs_hist_mean": -0.076803,
+      "vs_zero": -0.075,
+      "n_oos_weeks": 451,
+      "first_oos_week": "2018-01-12",
+      "last_oos_week": "2026-08-28"
+    },
+    "refiners": {
+      "vs_hist_mean": -0.03696,
+      "vs_zero": -0.032451,
+      "n_oos_weeks": 451,
+      "first_oos_week": "2018-01-12",
+      "last_oos_week": "2026-08-28"
+    },
+    "services": {
+      "vs_hist_mean": -0.058071,
+      "vs_zero": -0.06023,
+      "n_oos_weeks": 451,
+      "first_oos_week": "2018-01-12",
+      "last_oos_week": "2026-08-28"
+    }
+  },
+  "notes": {
+    "explanatory": "coefficients fit on past weeks only, applied to the SAME week's realized factors: tests whether exposures are stable, not whether returns are forecastable",
+    "predictive_lag1": "coefficients fit on past weeks, applied to LAST week's factors: a genuine one-week-ahead forecast"
+  }
+}

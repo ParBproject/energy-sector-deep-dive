@@ -1,0 +1,20 @@
+{
+  "as_of": "2026-10-22",
+  "snapshot_built_at": "2026-10-23T00:56:26+00:00",
+  "files": [
+    "market_sizing.json",
+    "returns.json",
+    "fundamentals.json",
+    "clustering.json",
+    "factor_model.json",
+    "scenarios.json"
+  ],
+  "sources": {
+    "market_sizing.json": "SEC EDGAR 10-K XBRL (point-in-time)",
+    "returns.json": "yfinance adjusted closes",
+    "fundamentals.json": "SEC EDGAR 10-K XBRL + yfinance",
+    "clustering.json": "derived: results/returns.json + fundamentals.json",
+    "factor_model.json": "yfinance, FRED DGS10, Fama-French",
+    "scenarios.json": "yfinance, Fama-French, commodity-price-forecaster (vendored)"
+  }
+}
