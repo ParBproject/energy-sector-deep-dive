@@ -18,10 +18,10 @@ NOTEBOOKS = {
         (
             "md",
             "# 01 · Market sizing\n\nThe textbook top-down size of US upstream is *US crude output x WTI*. "
-            "That needs a production volume series. EIA is unavailable here (no `EIA_API_KEY`) and the FRED "
-            "snapshot contains prices, rates and indices but no volumes, so we **do not** invent one. "
-            "Instead we build a bottom-up proxy from what companies actually reported in their 10-Ks, "
-            "read point-in-time by filing date.",
+            "The volume comes from the committed EIA snapshot (`MCRFPUS2`, refreshed weekly by "
+            "`.github/workflows/eia-refresh.yml`) and the price from FRED WTI; if a year is incomplete "
+            "the top-down is reported as unavailable, never estimated. Alongside it we build a bottom-up "
+            "proxy from what companies actually reported in their 10-Ks, read point-in-time by filing date.",
         ),
         ("code", SETUP),
         ("code", "from src.analysis import sizing\nres = sizing.compute()\nres['topdown_status']"),
@@ -40,7 +40,7 @@ NOTEBOOKS = {
             "md",
             "**Takeaway.** Revenue is dominated by majors and refiners because their sales pass crude and "
             "products through at market prices; upstream and services are small by revenue but, as notebook 02 "
-            "shows, carry most of the oil risk. A true top-down size waits on an EIA key.",
+            "shows, carry most of the oil risk. The top-down value of US crude output is shown above.",
         ),
     ],
     "02_returns_beta_drawdowns.ipynb": [

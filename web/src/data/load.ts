@@ -9,7 +9,7 @@ async function get<T>(name: string): Promise<T> {
 }
 
 export async function loadAll(): Promise<AllData> {
-  const [index, returns, sizing, fundamentals, factor, clustering, scenarios, ts] = await Promise.all([
+  const [index, returns, sizing, fundamentals, factor, clustering, scenarios, ts, eia] = await Promise.all([
     get<AllData["index"]>("index.json"),
     get<AllData["returns"]>("returns.json"),
     get<AllData["sizing"]>("market_sizing.json"),
@@ -18,6 +18,7 @@ export async function loadAll(): Promise<AllData> {
     get<AllData["clustering"]>("clustering.json"),
     get<AllData["scenarios"]>("scenarios.json"),
     get<AllData["ts"]>("timeseries.json"),
+    get<AllData["eia"]>("eia.json"),
   ]);
-  return { index, returns, sizing, fundamentals, factor, clustering, scenarios, ts };
+  return { index, returns, sizing, fundamentals, factor, clustering, scenarios, ts, eia };
 }

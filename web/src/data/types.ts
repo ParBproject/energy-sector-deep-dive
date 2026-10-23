@@ -18,6 +18,7 @@ export interface SizingResult {
   segment_share_latest: Record<Segment, number>;
   missing_revenue_latest_year: string[];
   caveats: string[];
+  topdown_status: TopDown;
 }
 export const RATIOS = ["capex_intensity", "reinvestment_rate", "fcf_yield", "debt_to_capital", "payout_ratio"] as const;
 export type Ratio = (typeof RATIOS)[number];
@@ -74,6 +75,16 @@ export interface ScenarioResult {
   forecaster_input: ForecasterInput;
 }
 export interface TimeSeries { dates: string[]; segments: Record<Segment, number[]>; symbols: Record<string, (number | null)[]> }
+export interface TopDown {
+  available: boolean;
+  reason?: string;
+  year?: number;
+  us_crude_production_avg_kbd?: number;
+  us_crude_value_usd?: number;
+  eia_as_of?: string;
+}
+export interface EiaSeries { label: string; units: string; series_id: string; frequency: string; latest_period: string; dates: string[]; values: number[] }
+export interface EiaData { as_of: string; retrieved_at: string; source: string; series: Record<string, EiaSeries> }
 export interface AllData {
   index: DataIndex;
   returns: ReturnsResult;
@@ -83,4 +94,5 @@ export interface AllData {
   clustering: ClusteringResult;
   scenarios: ScenarioResult;
   ts: TimeSeries;
+  eia: EiaData;
 }

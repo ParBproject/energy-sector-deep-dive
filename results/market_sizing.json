@@ -3,9 +3,18 @@
   "latest_fiscal_year": 2025,
   "approach": "bottom-up: summed reported revenue by segment (10-K, point-in-time)",
   "topdown_status": {
-    "available": false,
-    "requires": "US crude oil field production volume (EIA PET MCRFPUS2), not in snapshot",
-    "reason": "EIA_API_KEY not set; FRED snapshot has no production volume series"
+    "available": true,
+    "year": 2025,
+    "method": "sum over months of EIA MCRFPUS2 (kb/d) x 1000 x days x mean FRED DCOILWTICO",
+    "us_crude_production_bbl": 4986655000.0,
+    "us_crude_production_avg_kbd": 13662.068493,
+    "us_crude_value_usd": 325914605204.91064,
+    "eia_as_of": "2026-10-23",
+    "caveats": [
+      "Wellhead value at WTI Cushing spot; realized prices differ by grade and basin.",
+      "Crude only: excludes natural gas, NGLs and refined products.",
+      "Production for recent months is EIA's estimate and is revised in later releases."
+    ]
   },
   "segment_revenue_usd": {
     "majors": {

@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 import pandas as pd
 
-from src.data import edgar, eia, famafrench, fred, prices, rigs, universe
+from src.data import edgar, eia_snapshot, famafrench, fred, prices, rigs, universe
 from src.data.snapshot import SNAPSHOT_DIR
 
 START = "2015-01-01"
@@ -64,8 +64,8 @@ def main() -> None:
     status["famafrench"] = {"ok": True, "last": ff["date"].max()}
 
     status["eia"] = {
-        "ok": eia.available(),
-        "reason": None if eia.available() else "EIA_API_KEY not set",
+        "ok": eia_snapshot.meta() is not None,
+        "reason": "refreshed separately by scripts/refresh_eia.py (data/snapshot/eia.*)",
     }
     rc = rigs.load_rig_count()
     if rc is not None:
