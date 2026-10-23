@@ -35,7 +35,7 @@ otherwise the keyless `fredgraph.csv` endpoint. Missing observations (`.`) are d
 |---|---|
 | `ticker` | universe ticker the fact is attributed to |
 | `cik` | registrant CIK the fact came from (current or predecessor, see below) |
-| `concept` | us-gaap tag (revenues, net income, assets, equity, debt, CFO, capex, dividends, buybacks) |
+| `concept` | us-gaap tag (revenue, net income, assets, equity/partners' capital, debt, CFO, capex, dividends, buybacks; several alternative tags each, see `src/data/edgar.py::CONCEPTS`) or dei `EntityCommonStockSharesOutstanding` (cover-page share count) |
 | `unit` | XBRL unit, usually `USD` |
 | `value` | reported value |
 | `start`, `end` | reporting period (`start` empty for instant facts like `Assets`) |

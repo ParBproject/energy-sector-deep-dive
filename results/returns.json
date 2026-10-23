@@ -1,0 +1,491 @@
+{
+  "as_of": "2026-10-22",
+  "method": "Daily simple returns of adjusted closes, 2015-01-02 to as_of. Oil = CL=F front-month WTI future (same series as commodity-price-forecaster). OLS with HAC (Newey-West, 5 lags) standard errors. Segments are equal-weighted. Returns touching the negative 2020-04-20 settlement are excluded.",
+  "betas": {
+    "companies": {
+      "XOM": {
+        "segment": "majors",
+        "beta": 0.29673,
+        "se_hac": 0.032075,
+        "t_hac": 9.251248,
+        "ci95": [
+          0.233865,
+          0.359594
+        ],
+        "r2": 0.255836,
+        "n": 2969
+      },
+      "CVX": {
+        "segment": "majors",
+        "beta": 0.303432,
+        "se_hac": 0.036772,
+        "t_hac": 8.251738,
+        "ci95": [
+          0.231361,
+          0.375504
+        ],
+        "r2": 0.241136,
+        "n": 2969
+      },
+      "COP": {
+        "segment": "majors",
+        "beta": 0.452758,
+        "se_hac": 0.047397,
+        "t_hac": 9.552367,
+        "ci95": [
+          0.35986,
+          0.545655
+        ],
+        "r2": 0.317046,
+        "n": 2969
+      },
+      "EOG": {
+        "segment": "upstream",
+        "beta": 0.449877,
+        "se_hac": 0.053555,
+        "t_hac": 8.400224,
+        "ci95": [
+          0.344911,
+          0.554844
+        ],
+        "r2": 0.297502,
+        "n": 2969
+      },
+      "DVN": {
+        "segment": "upstream",
+        "beta": 0.597626,
+        "se_hac": 0.062488,
+        "t_hac": 9.563828,
+        "ci95": [
+          0.475152,
+          0.720101
+        ],
+        "r2": 0.315766,
+        "n": 2969
+      },
+      "FANG": {
+        "segment": "upstream",
+        "beta": 0.566388,
+        "se_hac": 0.063747,
+        "t_hac": 8.884986,
+        "ci95": [
+          0.441447,
+          0.691329
+        ],
+        "r2": 0.308603,
+        "n": 2969
+      },
+      "OXY": {
+        "segment": "upstream",
+        "beta": 0.495413,
+        "se_hac": 0.068336,
+        "t_hac": 7.249681,
+        "ci95": [
+          0.361477,
+          0.629348
+        ],
+        "r2": 0.25103,
+        "n": 2969
+      },
+      "APA": {
+        "segment": "upstream",
+        "beta": 0.6445,
+        "se_hac": 0.068835,
+        "t_hac": 9.363008,
+        "ci95": [
+          0.509586,
+          0.779413
+        ],
+        "r2": 0.281617,
+        "n": 2969
+      },
+      "KMI": {
+        "segment": "midstream",
+        "beta": 0.240408,
+        "se_hac": 0.041431,
+        "t_hac": 5.802626,
+        "ci95": [
+          0.159205,
+          0.321611
+        ],
+        "r2": 0.140217,
+        "n": 2969
+      },
+      "WMB": {
+        "segment": "midstream",
+        "beta": 0.263015,
+        "se_hac": 0.05166,
+        "t_hac": 5.091263,
+        "ci95": [
+          0.161763,
+          0.364267
+        ],
+        "r2": 0.098609,
+        "n": 2969
+      },
+      "OKE": {
+        "segment": "midstream",
+        "beta": 0.406321,
+        "se_hac": 0.072756,
+        "t_hac": 5.584741,
+        "ci95": [
+          0.263723,
+          0.548919
+        ],
+        "r2": 0.222263,
+        "n": 2969
+      },
+      "ET": {
+        "segment": "midstream",
+        "beta": 0.348525,
+        "se_hac": 0.043555,
+        "t_hac": 8.00192,
+        "ci95": [
+          0.263158,
+          0.433891
+        ],
+        "r2": 0.139399,
+        "n": 2969
+      },
+      "MPC": {
+        "segment": "refiners",
+        "beta": 0.277376,
+        "se_hac": 0.037088,
+        "t_hac": 7.478798,
+        "ci95": [
+          0.204685,
+          0.350068
+        ],
+        "r2": 0.105015,
+        "n": 2969
+      },
+      "VLO": {
+        "segment": "refiners",
+        "beta": 0.25851,
+        "se_hac": 0.038653,
+        "t_hac": 6.687957,
+        "ci95": [
+          0.182752,
+          0.334269
+        ],
+        "r2": 0.093235,
+        "n": 2969
+      },
+      "PSX": {
+        "segment": "refiners",
+        "beta": 0.274816,
+        "se_hac": 0.033878,
+        "t_hac": 8.11195,
+        "ci95": [
+          0.208416,
+          0.341215
+        ],
+        "r2": 0.139003,
+        "n": 2969
+      },
+      "SLB": {
+        "segment": "services",
+        "beta": 0.381211,
+        "se_hac": 0.045032,
+        "t_hac": 8.465343,
+        "ci95": [
+          0.29295,
+          0.469472
+        ],
+        "r2": 0.209022,
+        "n": 2969
+      },
+      "HAL": {
+        "segment": "services",
+        "beta": 0.503293,
+        "se_hac": 0.053199,
+        "t_hac": 9.460641,
+        "ci95": [
+          0.399026,
+          0.607561
+        ],
+        "r2": 0.280304,
+        "n": 2969
+      },
+      "BKR": {
+        "segment": "services",
+        "beta": 0.32721,
+        "se_hac": 0.046254,
+        "t_hac": 7.074189,
+        "ci95": [
+          0.236554,
+          0.417866
+        ],
+        "r2": 0.155436,
+        "n": 2969
+      }
+    },
+    "segments": {
+      "majors": {
+        "beta": 0.350973,
+        "se_hac": 0.037944,
+        "t_hac": 9.249665,
+        "ci95": [
+          0.276604,
+          0.425343
+        ],
+        "r2": 0.313273,
+        "n": 2969
+      },
+      "upstream": {
+        "beta": 0.550761,
+        "se_hac": 0.060838,
+        "t_hac": 9.05288,
+        "ci95": [
+          0.43152,
+          0.670001
+        ],
+        "r2": 0.351854,
+        "n": 2969
+      },
+      "midstream": {
+        "beta": 0.314567,
+        "se_hac": 0.050518,
+        "t_hac": 6.226861,
+        "ci95": [
+          0.215554,
+          0.41358
+        ],
+        "r2": 0.196011,
+        "n": 2969
+      },
+      "refiners": {
+        "beta": 0.270234,
+        "se_hac": 0.035483,
+        "t_hac": 7.615963,
+        "ci95": [
+          0.20069,
+          0.339779
+        ],
+        "r2": 0.123802,
+        "n": 2969
+      },
+      "services": {
+        "beta": 0.403905,
+        "se_hac": 0.047349,
+        "t_hac": 8.530387,
+        "ci95": [
+          0.311102,
+          0.496707
+        ],
+        "r2": 0.252004,
+        "n": 2969
+      }
+    },
+    "benchmarks": {
+      "XLE": {
+        "beta": 0.345395,
+        "se_hac": 0.039454,
+        "t_hac": 8.754308,
+        "ci95": [
+          0.268066,
+          0.422724
+        ],
+        "r2": 0.310415,
+        "n": 2969
+      },
+      "SPY": {
+        "beta": 0.073453,
+        "se_hac": 0.016961,
+        "t_hac": 4.330801,
+        "ci95": [
+          0.040211,
+          0.106696
+        ],
+        "r2": 0.038589,
+        "n": 2969
+      }
+    }
+  },
+  "highest_beta_segment": "upstream",
+  "lowest_beta_segment": "refiners",
+  "correlations": {
+    "window_days": 60,
+    "as_of": "2026-10-22",
+    "latest": {
+      "majors": {
+        "wti": 0.641892,
+        "spx": -0.425519
+      },
+      "upstream": {
+        "wti": 0.679315,
+        "spx": -0.290703
+      },
+      "midstream": {
+        "wti": 0.112371,
+        "spx": -0.087373
+      },
+      "refiners": {
+        "wti": 0.326983,
+        "spx": -0.168575
+      },
+      "services": {
+        "wti": 0.108414,
+        "spx": 0.148943
+      },
+      "XLE": {
+        "wti": 0.546316,
+        "spx": -0.30517
+      }
+    },
+    "mean_full_period": {
+      "majors": {
+        "wti": 0.627348,
+        "spx": 0.425206
+      },
+      "upstream": {
+        "wti": 0.65657,
+        "spx": 0.400513
+      },
+      "midstream": {
+        "wti": 0.444185,
+        "spx": 0.482749
+      },
+      "refiners": {
+        "wti": 0.391736,
+        "spx": 0.449719
+      },
+      "services": {
+        "wti": 0.553733,
+        "spx": 0.453074
+      },
+      "XLE": {
+        "wti": 0.634897,
+        "spx": 0.475992
+      }
+    }
+  },
+  "drawdowns": {
+    "2015-16 oil bust": {
+      "majors": {
+        "max_drawdown": -0.333743,
+        "peak": "2015-02-13",
+        "trough": "2015-08-25"
+      },
+      "upstream": {
+        "max_drawdown": -0.430086,
+        "peak": "2015-04-29",
+        "trough": "2016-01-20"
+      },
+      "midstream": {
+        "max_drawdown": -0.712845,
+        "peak": "2015-04-15",
+        "trough": "2016-02-08"
+      },
+      "refiners": {
+        "max_drawdown": -0.313901,
+        "peak": "2015-12-01",
+        "trough": "2016-02-11"
+      },
+      "services": {
+        "max_drawdown": -0.391658,
+        "peak": "2015-04-29",
+        "trough": "2016-01-20"
+      },
+      "XLE": {
+        "max_drawdown": -0.361298,
+        "peak": "2015-04-29",
+        "trough": "2016-01-20"
+      },
+      "SPY": {
+        "max_drawdown": -0.130229,
+        "peak": "2015-07-20",
+        "trough": "2016-02-11"
+      },
+      "CL=F": {
+        "max_drawdown": -0.573336,
+        "peak": "2015-06-10",
+        "trough": "2016-02-11"
+      }
+    },
+    "2020 COVID crash": {
+      "majors": {
+        "max_drawdown": -0.574733,
+        "peak": "2020-01-06",
+        "trough": "2020-03-18"
+      },
+      "upstream": {
+        "max_drawdown": -0.787011,
+        "peak": "2020-01-07",
+        "trough": "2020-03-18"
+      },
+      "midstream": {
+        "max_drawdown": -0.65618,
+        "peak": "2020-01-16",
+        "trough": "2020-03-18"
+      },
+      "refiners": {
+        "max_drawdown": -0.667858,
+        "peak": "2020-01-02",
+        "trough": "2020-03-23"
+      },
+      "services": {
+        "max_drawdown": -0.720679,
+        "peak": "2020-01-06",
+        "trough": "2020-03-18"
+      },
+      "XLE": {
+        "max_drawdown": -0.606048,
+        "peak": "2020-01-06",
+        "trough": "2020-03-18"
+      },
+      "SPY": {
+        "max_drawdown": -0.337173,
+        "peak": "2020-02-19",
+        "trough": "2020-03-23"
+      },
+      "CL=F": {
+        "max_drawdown": -0.711238,
+        "peak": "2020-01-06",
+        "trough": "2020-04-17"
+      }
+    },
+    "2022 rate shock": {
+      "majors": {
+        "max_drawdown": -0.261003,
+        "peak": "2022-06-08",
+        "trough": "2022-07-14"
+      },
+      "upstream": {
+        "max_drawdown": -0.315839,
+        "peak": "2022-06-07",
+        "trough": "2022-07-14"
+      },
+      "midstream": {
+        "max_drawdown": -0.209181,
+        "peak": "2022-06-07",
+        "trough": "2022-06-17"
+      },
+      "refiners": {
+        "max_drawdown": -0.292985,
+        "peak": "2022-06-07",
+        "trough": "2022-07-14"
+      },
+      "services": {
+        "max_drawdown": -0.4071,
+        "peak": "2022-06-08",
+        "trough": "2022-09-26"
+      },
+      "XLE": {
+        "max_drawdown": -0.260439,
+        "peak": "2022-06-08",
+        "trough": "2022-07-14"
+      },
+      "SPY": {
+        "max_drawdown": -0.244964,
+        "peak": "2022-01-03",
+        "trough": "2022-10-12"
+      },
+      "CL=F": {
+        "max_drawdown": -0.425869,
+        "peak": "2022-03-08",
+        "trough": "2022-12-09"
+      }
+    }
+  }
+}
