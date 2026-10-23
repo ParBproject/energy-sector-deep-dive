@@ -107,7 +107,7 @@ export function App() {
           </m.section>
         </AnimatePresence>
         <footer className="foot">
-          Sensitivity analysis and descriptive statistics only; nothing here is a trading signal. Data: yfinance, FRED, SEC EDGAR, Fama-French; snapshot {data?.index.snapshot_built_at.slice(0, 10) ?? "…"}.
+          Sensitivity analysis and descriptive statistics only; nothing here is a trading signal. Data: yfinance, FRED, SEC EDGAR, Fama-French, U.S. EIA; snapshot {data?.index.snapshot_built_at.slice(0, 10) ?? "…"}, EIA data as of {data?.eia.as_of ?? "…"}.
         </footer>
       </main>
       <CompanyPanel />

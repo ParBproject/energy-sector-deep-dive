@@ -30,7 +30,7 @@ def test_web_export_copies_results_verbatim():
     for name in web.FILES:
         assert (web.WEB_DATA / name).read_bytes() == (RESULTS / name).read_bytes()
     index = json.loads((web.WEB_DATA / "index.json").read_text())
-    assert set(index["sources"]) == {*web.FILES, "timeseries.json"}
+    assert set(index["sources"]) == {*web.FILES, "timeseries.json", "eia.json"}
 
 
 def test_timeseries_export_shape_and_values():

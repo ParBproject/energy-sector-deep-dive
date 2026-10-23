@@ -38,7 +38,11 @@ def test_headline_numbers_pinned():
     sz = json.loads((RESULTS / "market_sizing.json").read_text())
     assert sz["latest_fiscal_year"] == 2025
     assert sz["total_revenue_latest_usd"] / 1e9 == pytest.approx(1278.1, abs=0.1)
-    assert sz["topdown_status"]["available"] is False
+    td = sz["topdown_status"]
+    assert td["available"] is True and td["year"] == 2025
+    # US crude averaged ~13.6 mb/d in 2025 (EIA); the value is a few hundred $bn at ~$65 WTI
+    assert 12_500 < td["us_crude_production_avg_kbd"] < 14_500
+    assert 200e9 < td["us_crude_value_usd"] < 500e9
 
 
 def test_beta_matches_textbook_ols_point_estimate():
