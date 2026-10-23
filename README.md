@@ -178,6 +178,11 @@ python -m scripts.run_m3           # offline: clustering, factor model, scenario
 python -m scripts.make_notebooks   # rebuild and execute notebooks/0*.ipynb
 ```
 
+**SEC User-Agent.** SEC EDGAR asks automated clients for a `"Name email"` User-Agent. The code reads it from the
+`SEC_USER_AGENT` environment variable; if that is unset it falls back to the project contact
+`Par Bahrae githubproproject@proton.me`. In GitHub Actions the value comes from the `SEC_USER_AGENT` repository secret.
+Set your own when you re-fetch: `export SEC_USER_AGENT="Your Name you@example.com"`.
+
 ## Repo layout
 ```
 config/universe.yaml   fixed 2015 universe, segments, M&A / bankruptcy notes
