@@ -190,3 +190,130 @@ def fundamentals_heatmap(fund: dict) -> str:
         "fundamentals_heatmap.png",
         "Source: SEC EDGAR 10-K (filing-date as-of), yfinance price. Cell text = raw value.",
     )
+
+
+# ── M3 ──────────────────────────────────────────────────────────────────────
+MARKERS = {"majors": "o", "upstream": "s", "midstream": "D", "refiners": "^", "services": "v"}
+CLUSTER_COLORS = [EMERALD, "#60A5FA", "#F59E0B", "#A78BFA", "#F472B6", "#E5E7EB"]
+
+
+def clusters(cl: dict) -> str:
+    theme()
+    labels = segment_labels()
+    pca, assign = cl["pca"], cl["k5"]["kmeans"]["assignments"]
+    fig, ax = plt.subplots(figsize=(9, 5.6))
+    for t, (x, y) in pca["coords"].items():
+        seg = pca["segment"][t]
+        ax.scatter(
+            x,
+            y,
+            s=110,
+            marker=MARKERS[seg],
+            color=CLUSTER_COLORS[assign[t]],
+            edgecolor=BG,
+            linewidth=0.8,
+        )
+        ax.annotate(t, (x, y), xytext=(6, 4), textcoords="offset points", fontsize=8, color=TEXT)
+    seg_h = [
+        plt.Line2D([], [], marker=MARKERS[s], ls="", color=MUTED, label=labels[s])
+        for s in SEGMENT_ORDER
+    ]
+    ax.legend(handles=seg_h, fontsize=8, loc="best", title="marker = segment", title_fontsize=8)
+    ev = pca["explained_variance_ratio"]
+    ax.set_xlabel(f"PC1 ({ev[0]:.0%} of variance)")
+    ax.set_ylabel(f"PC2 ({ev[1]:.0%})")
+    k5 = cl["k5"]["kmeans"]
+    ax.set_title(
+        f"k-means (k=5) on oil beta + fundamentals: colour = cluster, "
+        f"ARI vs segments {k5['adjusted_rand_vs_segments']:.2f}"
+    )
+    return _save(
+        fig,
+        "clusters.png",
+        f"Standardized features; {cl['n_imputed_cells']} imputed "
+        "cells (universe median, flagged). Source: results/clustering.json",
+    )
+
+
+def oos_r2(fm: dict) -> str:
+    theme()
+    labels = segment_labels()
+    ex = [fm["walk_forward_explanatory"][s]["vs_hist_mean"] for s in SEGMENT_ORDER]
+    pr = [fm["walk_forward_predictive_lag1"][s]["vs_hist_mean"] for s in SEGMENT_ORDER]
+    fig, ax = plt.subplots(figsize=(9, 4.4))
+    x = np.arange(len(SEGMENT_ORDER))
+    ax.bar(
+        x - 0.2,
+        np.array(ex) * 100,
+        0.38,
+        color=EMERALD,
+        label="same-week factors (exposure stability)",
+    )
+    ax.bar(
+        x + 0.2, np.array(pr) * 100, 0.38, color="#EF4444", label="last week's factors (forecast)"
+    )
+    ax.axhline(0, color=MUTED, lw=0.8)
+    ax.set_xticks(x, [labels[s] for s in SEGMENT_ORDER], fontsize=8.5)
+    ax.set_ylabel("out-of-sample R², % vs historical mean")
+    ax.set_title("Walk-forward factor model: explains well, forecasts nothing")
+    ax.legend(fontsize=8.5, loc="center right")
+    return _save(
+        fig, "oos_r2.png", "Expanding window, refit weekly, first 156 weeks training only."
+    )
+
+
+def factor_tstats(fm: dict) -> str:
+    theme()
+    labels = segment_labels()
+    facs = fm["factors"]
+    mat = np.array([[fm["full_sample"][s]["t_hac"][f] for f in facs] for s in SEGMENT_ORDER])
+    fig, ax = plt.subplots(figsize=(9, 4))
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("div", ["#EF4444", PANEL, EMERALD])
+    ax.imshow(np.clip(mat, -6, 6), cmap=cmap, vmin=-6, vmax=6, aspect="auto")
+    ax.grid(False)
+    for i in range(mat.shape[0]):
+        for j in range(mat.shape[1]):
+            ax.text(j, i, f"{mat[i, j]:.1f}", ha="center", va="center", fontsize=8.5, color=TEXT)
+    ax.set_xticks(range(len(facs)), facs)
+    ax.set_yticks(range(len(SEGMENT_ORDER)), [labels[s] for s in SEGMENT_ORDER])
+    ax.set_title("Weekly factor model: HAC t-statistics")
+    return _save(
+        fig,
+        "factor_tstats.png",
+        "brent_wti = crack-spread proxy (Brent-WTI spread change); no dollar series in snapshot.",
+    )
+
+
+def scenario_fan(sc: dict) -> str:
+    theme()
+    labels = segment_labels()
+    grid = sorted(sc["grid"], key=float)
+    xs = np.array([float(g) for g in grid])
+    fig, ax = plt.subplots(figsize=(9, 5))
+    for s in SEGMENT_ORDER:
+        mid = np.array([sc["grid"][g][s]["expected_pct"] for g in grid])
+        lo = np.array([sc["grid"][g][s]["param_band_pct"][0] for g in grid])
+        hi = np.array([sc["grid"][g][s]["param_band_pct"][1] for g in grid])
+        ax.plot(xs, mid, color=SEG_COLORS[s], lw=1.6, label=labels[s])
+        ax.fill_between(xs, lo, hi, color=SEG_COLORS[s], alpha=0.18, lw=0)
+    fc = sc["forecaster_input"]
+    if "implied_move_pct" in fc:
+        ax.axvline(fc["implied_move_pct"], color=TEXT, ls=":", lw=1)
+        ax.text(
+            fc["implied_move_pct"],
+            ax.get_ylim()[1] * 0.9,
+            f" forecaster step {fc['target_week']}\n ({fc['model']}, already realized)",
+            fontsize=7.5,
+            color=MUTED,
+        )
+    ax.axhline(0, color=MUTED, lw=0.6)
+    ax.set_xlabel("WTI move over a week, %")
+    ax.set_ylabel("expected segment move, %")
+    ax.set_title("Oil sensitivity: what a WTI move has typically meant (not a signal)")
+    ax.legend(fontsize=8.5, loc="upper left")
+    return _save(
+        fig,
+        "scenario_fan.png",
+        "Bands: 95% from HAC beta standard errors (parameter "
+        "uncertainty only). Source: results/scenarios.json",
+    )
