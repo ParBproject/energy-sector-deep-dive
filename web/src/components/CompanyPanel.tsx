@@ -1,5 +1,5 @@
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useMemo } from "react";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { tokens } from "../design/tokens";
 import { rangeIdx, rangeReturn } from "../data/derive";
@@ -13,6 +13,29 @@ const c = tokens.color;
 export function CompanyPanel() {
   const { data, company, selectCompany, pins, togglePin, range, onlySegment } = useStore();
   const reduced = useReducedMotion();
+  const opener = useRef<HTMLElement | null>(null);
+  const open = Boolean(company);
+  useEffect(() => {
+    const track = (e: FocusEvent) => {
+      const t = e.target as HTMLElement;
+      if (!t.closest?.(".panel")) opener.current = t;
+    };
+    document.addEventListener("focusin", track);
+    return () => document.removeEventListener("focusin", track);
+  }, []);
+  useEffect(() => {
+    if (!open && opener.current?.isConnected) opener.current.focus();
+  }, [open]);
+  /** Keep Tab inside the dialog while it is open. */
+  const trap = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape") return selectCompany(null);
+    if (e.key !== "Tab") return;
+    const f = e.currentTarget.querySelectorAll<HTMLElement>("button, [href], [tabindex]:not([tabindex='-1'])");
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  };
   const info = data && company ? data.returns.betas.companies[company] : null;
   const fund = data && company ? data.fundamentals.companies[company] : null;
   const option = useMemo(() => {
@@ -46,8 +69,8 @@ export function CompanyPanel() {
     <AnimatePresence>
       {data && company && info && fund && (
         <>
-          <motion.div key="scrim" className="scrim panel-scrim" onClick={() => selectCompany(null)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : tokens.motion.fast }} />
-          <motion.aside
+          <m.div key="scrim" className="scrim panel-scrim" onClick={() => selectCompany(null)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : tokens.motion.fast }} />
+          <m.div
             key="panel"
             className="panel"
             role="dialog"
@@ -57,7 +80,7 @@ export function CompanyPanel() {
             animate={{ x: 0, opacity: 1 }}
             exit={reduced ? { opacity: 0 } : { x: 40, opacity: 0 }}
             transition={{ duration: reduced ? 0 : tokens.motion.base, ease: tokens.motion.ease as [number, number, number, number] }}
-            onKeyDown={(e) => e.key === "Escape" && selectCompany(null)}
+            onKeyDown={trap}
           >
             <div className="handle only-mobile" aria-hidden />
             <nav className="crumbs" aria-label="Breadcrumb">
@@ -67,7 +90,7 @@ export function CompanyPanel() {
               <span aria-hidden>›</span>
               <span aria-current="page">{company}</span>
             </nav>
-            <header className="panel-head">
+            <div className="panel-head">
               <h2>{company}</h2>
               <div className="panel-actions">
                 <button className="btn" aria-pressed={pins.includes(company)} onClick={() => togglePin(company)}>
@@ -77,12 +100,12 @@ export function CompanyPanel() {
                   ✕
                 </button>
               </div>
-            </header>
+            </div>
             <dl className="facts">
-              <div><dt>Oil beta</dt><dd className="num">{info.beta.toFixed(2)}</dd><small className="num">CI {info.ci95[0].toFixed(2)}–{info.ci95[1].toFixed(2)}</small></div>
-              <div><dt>Return in range</dt><dd className="num">{pct(ret, 0)}</dd><small>{range ? `${range[0]} → ${range[1]}` : "2015 → today"}</small></div>
-              <div><dt>Revenue FY{fund.fiscal_year_end.slice(0, 4)}</dt><dd className="num">{usdBn(fund.revenue)}</dd><small>Mkt cap {usdBn(fund.market_cap)}</small></div>
-              <div><dt>Cluster</dt><dd className="num">{cluster != null ? cluster + 1 : "n/a"}</dd><small>k-means, k=5</small></div>
+              <div><dt>Oil beta</dt><dd className="num">{info.beta.toFixed(2)}</dd><dd className="sub num">CI {info.ci95[0].toFixed(2)}–{info.ci95[1].toFixed(2)}</dd></div>
+              <div><dt>Return in range</dt><dd className="num">{pct(ret, 0)}</dd><dd className="sub">{range ? `${range[0]} → ${range[1]}` : "2015 → today"}</dd></div>
+              <div><dt>Revenue FY{fund.fiscal_year_end.slice(0, 4)}</dt><dd className="num">{usdBn(fund.revenue)}</dd><dd className="sub">Mkt cap {usdBn(fund.market_cap)}</dd></div>
+              <div><dt>Cluster</dt><dd className="num">{cluster != null ? cluster + 1 : "n/a"}</dd><dd className="sub">k-means, k=5</dd></div>
             </dl>
             <h3 className="label">Indexed to 100 at range start</h3>
             {option && <EChart option={option} label={`${company} price index against its segment and XLE`} height={200} />}
@@ -101,7 +124,7 @@ export function CompanyPanel() {
               </tbody>
             </table>
             <p className="stamp"><span>Sources: yfinance, SEC EDGAR 10-K (filed by {data.fundamentals.as_of})</span></p>
-          </motion.aside>
+          </m.div>
         </>
       )}
     </AnimatePresence>,

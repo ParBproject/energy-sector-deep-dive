@@ -1,5 +1,9 @@
 # Energy Sector Deep Dive
 
+[![Energy Sector Explorer](docs/img/hero.png)](https://parbproject.github.io/energy-sector-deep-dive/)
+
+**[Open the live explorer →](https://parbproject.github.io/energy-sector-deep-dive/)** · **[Read the findings →](docs/findings.md)**
+
 How do the five segments of US oil & gas (integrated majors, producers, pipelines, refiners
 and oilfield services) actually trade against oil, gas, XLE and the S&P 500, from the 2015–16
 bust through 2020 and 2022 to today? This repo is a reproducible, point-in-time research
@@ -8,8 +12,8 @@ pipeline whose results are presented in an interactive explorer.
 It is the companion to [commodity-price-forecaster](https://github.com/ParBproject/commodity-price-forecaster).
 Both use the same WTI, Brent and Henry Hub series (Yahoo `CL=F`, `BZ=F`, `NG=F`).
 
-> Status: **Milestone 5 (interactive explorer)** complete. Live: https://parbproject.github.io/energy-sector-deep-dive/
-> Findings below are generated from `results/*.json`.
+> Status: **Milestone 6 (polish and launch)** complete. Live: https://parbproject.github.io/energy-sector-deep-dive/
+> Employer-facing write-up with limitations: [`docs/findings.md`](docs/findings.md). Findings below are generated from `results/*.json`.
 
 ## Scope
 - **Period:** 2015-01-02 to present, daily prices; quarterly and annual fundamentals.
@@ -42,6 +46,12 @@ Both use the same WTI, Brent and Henry Hub series (Yahoo `CL=F`, `BZ=F`, `NG=F`)
 Column-level detail: [`docs/data_dictionary.md`](docs/data_dictionary.md). Every pull is cached
 to `data/raw/` with its fetch date; a small real snapshot (≈0.5 MB) is committed in
 `data/snapshot/` so tests and later milestones run offline.
+
+## Explorer demo
+
+![Explorer demo: segment filter, date-range brush, company drill-down, pins and the oil scenario](docs/img/demo.gif)
+
+Six linked views (overview, returns and drawdowns, fundamentals, clusters, factor model, oil scenario) share one URL-synced state, so any view can be linked to directly. The explorer is usable by keyboard (skip link, visible focus rings, a company picker as a keyboard path to the drill-down, Escape closes the detail panel and returns focus). Every chart carries an ARIA label and an ECharts-generated text description, and the app honours reduced motion. axe reports 0 violations across all views at 1280 px and 390 px. Lighthouse (mobile, live site, 2026-10-22): performance 94–96, accessibility 100, best practices 100, SEO 100.
 
 <!-- findings:start -->
 ## Findings (M2)
@@ -144,8 +154,8 @@ Forecaster tie-in: the latest one-step WTI forecast published by [commodity-pric
 4. **M4 – Design system and app shell** ✅ `web/`: Vite + React + TS, tokens in one file shared with the Python charts, ECharts theme, sticky filters, KPI strip, chart cards, 390 px mobile layout, styleguide route.
 
    ![App shell, desktop](docs/img/ui_m4_desktop.png)
-5. **M5 – Interactive explorer (done):** six views from exported data, Zustand store synced to the URL hash, company drawer, Framer Motion with reduced-motion support, 390 px layout, deployed to GitHub Pages from `gh-pages` (no workflow). linked filters, brush-to-zoom, synced hover, sector → segment → company drill-down, compare pins, oil-scenario slider fed by the commodity forecaster (a what-if tool, not a signal).
-6. **M6 – Polish and launch:** mobile (390 px first), Lighthouse ≥ 90 mobile performance and accessibility, README visuals, GitHub Pages deploy, portfolio-site card.
+5. **M5 – Interactive explorer** ✅ six views from exported data, Zustand store synced to the URL hash, linked filters, brush-to-zoom, synced hover, sector → segment → company drill-down, compare pins, oil-scenario slider with the commodity forecaster as a dated preset (a what-if tool, not a signal). Deployed to GitHub Pages from `gh-pages` (no workflow).
+6. **M6 – Polish and launch** ✅ accessibility pass (axe: 0 violations), ECharts and Framer Motion code-split, Lighthouse mobile ≥ 90, demo GIF and hero image, [findings write-up](docs/findings.md), cross-links with commodity-price-forecaster.
 
 ## How to run
 ```bash
@@ -170,14 +180,17 @@ python -m scripts.make_notebooks   # rebuild and execute notebooks/0*.ipynb
 ```
 config/universe.yaml   fixed 2015 universe, segments, M&A / bankruptcy notes
 src/data/              cached loaders: prices, fred, edgar, eia, rigs, famafrench, snapshot
-src/analysis/          (M2–M3) returns, betas, fundamentals, clustering, regression
+src/analysis/          returns, betas, fundamentals, clustering, regression
 src/scenarios/         oil-price what-if mapping
-src/export/            (M4) JSON for the web app
+src/export/            JSON for the web app
 scripts/               build_snapshot.py
 data/snapshot/         committed real data + manifest.json
 notebooks/ results/ docs/img/ web/
 tests/                 loaders, cache, point-in-time filing dates, snapshot
 ```
+
+## Deploying the explorer
+No workflow is needed. Build with `cd web && npm run build` (Vite `base` is `/energy-sector-deep-dive/`), then push the contents of `web/dist` plus `.nojekyll` to the `gh-pages` branch. Pages serves `gh-pages /`.
 
 ## License
 MIT
@@ -185,9 +198,9 @@ MIT
 > CI: the workflow is staged at [`docs/ci.yml.proposed`](docs/ci.yml.proposed). Move it to
 > `.github/workflows/ci.yml` (needs a token with `workflow` scope, or the GitHub web UI) to enable ruff + pytest on every PR.
 
-## Explorer screenshots (M5)
+## Explorer screenshots
 
-![Overview](docs/img/ui_m5_desktop_overview.png)
-![Returns with company panel](docs/img/ui_m5_desktop_returns_panel.png)
-![Scenario](docs/img/ui_m5_desktop_scenario.png)
-![Mobile overview](docs/img/ui_m5_mobile_overview.png)
+![Overview](docs/img/ui_m6_desktop_overview.png)
+![Returns with company panel](docs/img/ui_m6_desktop_returns_panel.png)
+![Scenario](docs/img/ui_m6_desktop_scenario.png)
+![Mobile overview](docs/img/ui_m6_mobile_overview.png)
