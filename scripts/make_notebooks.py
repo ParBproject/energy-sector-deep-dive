@@ -118,6 +118,88 @@ NOTEBOOKS = {
         ("code", "{k: v for k, v in res['missing'].items() if v}"),
         ("code", "Image('../docs/img/fundamentals_heatmap.png')"),
     ],
+    "04_clustering.ipynb": [
+        (
+            "md",
+            "# 04 · Clustering\n\nDo oil beta and point-in-time fundamentals rediscover the five segments? "
+            "Features are z-scored. Missing ratios are imputed with the **universe** median (not the segment "
+            "median, which would leak the answer) and every imputed cell is flagged. A complete-case run is the check.",
+        ),
+        ("code", SETUP),
+        (
+            "code",
+            "from src.analysis import clustering\nraw, z, seg, imputed = clustering.feature_matrix()\nraw.assign(segment=seg)",
+        ),
+        ("code", "imputed.sum().rename('imputed cells')"),
+        ("code", "res = clustering.compute()\npd.DataFrame(res['silhouette_by_k'])"),
+        (
+            "code",
+            "pd.DataFrame({n: {'silhouette': v['silhouette'], 'ARI vs segments': v['adjusted_rand_vs_segments']} for n, v in res['k5'].items()})",
+        ),
+        (
+            "code",
+            "pd.DataFrame({'segment': seg, 'kmeans': res['k5']['kmeans']['assignments'], 'ward': res['k5']['ward']['assignments']}).sort_values('kmeans')",
+        ),
+        ("code", "res['complete_case']"),
+        ("code", "Image('../docs/img/clusters.png')"),
+        (
+            "code",
+            "display(Markdown(f\"**Takeaway.** Clusters recover the segments only partly (ARI {res['k5']['kmeans']['adjusted_rand_vs_segments']:.2f}): "
+            'producers group cleanly, while majors land with refiners on low leverage and high payouts, and WMB stands alone as the most levered, highest-reinvestment name."))',
+        ),
+    ],
+    "05_factor_model.ipynb": [
+        (
+            "md",
+            "# 05 · Weekly factor model and walk-forward test\n\nFactors: oil, gas, a crack-spread **proxy** "
+            "(change in the Brent-WTI spread, because gasoline and heating-oil futures are not in the snapshot), "
+            "the change in the 10-year yield and Fama-French 3. No dollar series exists in the snapshot, so none is used. "
+            "Full-sample fits use HAC errors. Out-of-sample R² comes from an expanding window refit every week with no look-ahead.",
+        ),
+        ("code", SETUP),
+        (
+            "code",
+            "from src.analysis import factor_model as fm\nres = fm.compute()\nres['sample'], res['crack_spread_proxy'], res['dollar_proxy']",
+        ),
+        ("code", "pd.DataFrame({s: v['coef'] for s, v in res['full_sample'].items()})"),
+        ("code", "pd.DataFrame({s: v['t_hac'] for s, v in res['full_sample'].items()})"),
+        ("code", "Image('../docs/img/factor_tstats.png')"),
+        (
+            "code",
+            "pd.DataFrame({'explanatory (same-week factors)': {s: v['vs_hist_mean'] for s, v in res['walk_forward_explanatory'].items()},\n"
+            "              'predictive (lag-1 factors)': {s: v['vs_hist_mean'] for s, v in res['walk_forward_predictive_lag1'].items()},\n"
+            "              'predictive vs zero': {s: v['vs_zero'] for s, v in res['walk_forward_predictive_lag1'].items()}})",
+        ),
+        ("code", "Image('../docs/img/oos_r2.png')"),
+        (
+            "md",
+            "**Takeaway.** The exposures are real and stable: same-week factors explain more than half of weekly variance out of sample. "
+            "Last week's factors forecast nothing, with out-of-sample R² below zero against both baselines. That is what an efficient market predicts, "
+            "and it is why the scenario tool is framed as sensitivity analysis.",
+        ),
+    ],
+    "06_scenarios.ipynb": [
+        (
+            "md",
+            "# 06 · Oil scenarios and the forecaster tie-in\n\nMaps a WTI % move to each segment's expected move using weekly oil betas with HAC bands. "
+            "**This is sensitivity analysis, not a trading signal.**",
+        ),
+        ("code", SETUP),
+        (
+            "code",
+            "from src.scenarios import oil, forecaster\nres = oil.compute()\npd.DataFrame(res['weekly_betas']).T",
+        ),
+        ("code", "pd.DataFrame(oil.scenario(-10, res['weekly_betas'])).T"),
+        (
+            "md",
+            "## Commodity-forecaster input\nThe forecaster publishes rolling one-step **backtest** forecasts in `results/leaderboard.json`. "
+            "A dated copy is vendored in `data/vendor/`. Its last step has already been realized, so it is shown as a preset next to the "
+            "slider, not as a forward view.",
+        ),
+        ("code", "res['forecaster_input']"),
+        ("code", "pd.DataFrame(res['forecaster_scenario']).T"),
+        ("code", "Image('../docs/img/scenario_fan.png')"),
+    ],
 }
 
 
