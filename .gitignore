@@ -10,3 +10,5 @@ data/cache/
 node_modules/
 web/dist/
 .ipynb_checkpoints/
+data/raw/*
+!data/raw/.gitkeep
