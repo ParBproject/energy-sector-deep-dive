@@ -128,7 +128,7 @@ export function Factors({ d }: { d: AllData }) {
       <ChartCard id="fh" span={7} title="Weekly factor exposures (HAC t-stats)" description={`brent_wti is a crack-spread proxy (${d.factor.crack_spread_proxy.split(";")[0]}). Dollar: ${d.factor.dollar_proxy}.`} source={src["factor_model.json"]} asOf={s.last_week}>
         <EChart option={fh} label="Heatmap of factor t statistics by segment" />
       </ChartCard>
-      <ChartCard id="oos" span={5} title="Explains well, forecasts nothing" description={`Walk-forward OOS R² vs historical mean, ${s.n_weeks} weeks. Green: same-week factors. Red: last week's factors.`} source={src["factor_model.json"]} asOf={s.last_week}>
+      <ChartCard id="oos" span={5} title="Same-week fit vs last week's factors" description={`Walk-forward OOS R² vs historical mean, ${s.n_weeks} weeks. Green: same-week factors. Red: last week's factors.`} source={src["factor_model.json"]} asOf={s.last_week}>
         <EChart option={oos} label="Bar chart of out-of-sample R squared" />
       </ChartCard>
     </div>

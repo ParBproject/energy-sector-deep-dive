@@ -1,4 +1,4 @@
-"""README charts: dark theme matching parbproject.github.io, emerald #10B981 accent."""
+"""Charts for the README. Colours come from the explorer tokens."""
 
 from __future__ import annotations
 
@@ -15,8 +15,8 @@ from matplotlib.patches import Patch  # noqa: E402
 from src.analysis.common import ROOT, SEGMENT_ORDER, segment_labels  # noqa: E402
 
 IMG = ROOT / "docs" / "img"
-# Colours and type come from the app's single token source (web/src/design/tokens.ts ->
-# tokens.json via `npm run tokens`), so README charts and the explorer match.
+# Colours come from web/src/design/tokens.ts, exported to tokens.json, so these
+# charts match the explorer.
 TOKENS = json.loads((ROOT / "web" / "src" / "design" / "tokens.json").read_text())
 _C = TOKENS["color"]
 BG, PANEL, TEXT, MUTED, GRID = _C["bg"], _C["surface1"], _C["text"], _C["textMuted"], _C["grid"]
@@ -192,7 +192,6 @@ def fundamentals_heatmap(fund: dict) -> str:
     )
 
 
-# ── M3 ──────────────────────────────────────────────────────────────────────
 MARKERS = {"majors": "o", "upstream": "s", "midstream": "D", "refiners": "^", "services": "v"}
 CLUSTER_COLORS = [EMERALD, *SEG_COLORS.values()]
 
@@ -247,19 +246,19 @@ def oos_r2(fm: dict) -> str:
         np.array(ex) * 100,
         0.38,
         color=EMERALD,
-        label="same-week factors (exposure stability)",
+        label="same-week factors",
     )
     ax.bar(
         x + 0.2,
         np.array(pr) * 100,
         0.38,
         color=_C["danger"],
-        label="last week's factors (forecast)",
+        label="last week's factors",
     )
     ax.axhline(0, color=MUTED, lw=0.8)
     ax.set_xticks(x, [labels[s] for s in SEGMENT_ORDER], fontsize=8.5)
     ax.set_ylabel("out-of-sample R², % vs historical mean")
-    ax.set_title("Walk-forward factor model: explains well, forecasts nothing")
+    ax.set_title("Walk-forward out-of-sample R²")
     ax.legend(fontsize=8.5, loc="center right")
     return _save(
         fig, "oos_r2.png", "Expanding window, refit weekly, first 156 weeks training only."

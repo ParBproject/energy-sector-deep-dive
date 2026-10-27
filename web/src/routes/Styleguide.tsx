@@ -13,7 +13,7 @@ export function Styleguide() {
     () => ({
       xAxis: { type: "category", data: SEGMENTS.map((s) => SEGMENT_LABELS[s]) },
       yAxis: { type: "value" },
-      series: [{ type: "bar", data: SEGMENTS.map((s, i) => ({ value: [0.35, 0.55, 0.31, 0.27, 0.4][i], itemStyle: { color: c.segment[s] } })) }],
+      series: [{ type: "bar", data: SEGMENTS.map((s, i) => ({ value: i + 1, itemStyle: { color: c.segment[s] } })) }],
     }),
     [],
   );
@@ -64,7 +64,7 @@ export function Styleguide() {
         <h2>Type scale · Inter / JetBrains Mono</h2>
         {Object.entries(tokens.font.size).reverse().map(([k, v]) => (
           <div key={k} style={{ fontSize: v, lineHeight: 1.3, marginBottom: 8 }}>
-            {k} {v}px · Oil beta <span className="num">0.551 1,278.09</span>
+            {k} {v}px · <span className="num">1,234.50</span>
           </div>
         ))}
       </section>
@@ -90,7 +90,7 @@ export function Styleguide() {
           <button className="chip" aria-pressed="false"><span className="dot" style={{ background: c.segment.majors }} />Chip</button>
         </div>
         <div className="grid12">
-          <ChartCard id="sg-chart" title="Chart card" description="ECharts with the registered theme." source="tokens demo" asOf="2026-10-22">
+          <ChartCard id="sg-chart" title="Chart card" description="Sample bars for the chart theme. Not a result from the analysis." source="sample">
             <EChart option={demo} label="Demo bar chart" />
           </ChartCard>
           <ChartCard id="sg-skel" title="Loading state" description="Skeleton loader while data arrives." source="—" loading>

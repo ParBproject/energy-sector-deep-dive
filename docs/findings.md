@@ -1,18 +1,10 @@
-# Findings: how US oil & gas segments trade against oil
+# Findings
 
-*Data as of 2026-10-22. All numbers come from `results/*.json`, which `make results` rebuilds from the committed snapshot. Explore them in the [live explorer](https://parbproject.github.io/energy-sector-deep-dive/).*
+Price data runs through 2026-10-22. The EIA snapshot is as of 2026-10-23. Figures below are the ones in `results/*.json`, which `make results` rebuilds from `data/snapshot/`. The same files drive the [explorer](https://parbproject.github.io/energy-sector-deep-dive/).
 
-## The short version
+## Oil beta
 
-1. **Oil sensitivity follows the value chain.** Producers (E&P) move about 0.55% for every 1% move in WTI. Refiners move about 0.27%, because they buy crude as an input. Majors, services and midstream sit in between. All of these betas are well above the S&P 500's 0.07.
-2. **Every segment fell hard in 2020, but the 2015–16 bust hit midstream hardest.** Equal-weighted midstream fell 71% in 2015–16, worse than WTI itself. That was a leverage and distribution story more than a commodity one.
-3. **Fundamentals rediscover the segments.** k-means on five balance-sheet and cash-flow ratios recovers the segment labels with an adjusted Rand index of 0.61 (0.76 on complete cases).
-4. **Factors explain returns but do not forecast them.** Oil, gas, Brent–WTI, 10-year rate and Fama-French factors explain 54–69% of weekly segment returns within the same week. Using *last* week's factors, out-of-sample R² is negative for every segment (−3.7% to −7.7%).
-5. **The scenario tool is a sensitivity, not a signal.** If WTI falls 10%, a typical week sees E&P move −5.5% (95% band −7.7% to −3.3%). The commodity-forecaster preset is a dated, already-realized forecast.
-
-## 1. Oil beta by segment
-
-Daily returns regressed on WTI returns, 2015 onward, with HAC (Newey-West) standard errors.
+Daily returns on WTI returns, from 2015, with Newey-West standard errors (5 lags). Segments are equal-weighted.
 
 | Segment | Oil beta | 95% CI | R² |
 |---|---|---|---|
@@ -21,32 +13,35 @@ Daily returns regressed on WTI returns, 2015 onward, with HAC (Newey-West) stand
 | Integrated majors | 0.35 | 0.28 to 0.43 | 0.31 |
 | Pipelines & midstream | 0.31 | 0.22 to 0.41 | 0.20 |
 | Refining & marketing | 0.27 | 0.20 to 0.34 | 0.12 |
-| *XLE / S&P 500* | *0.35 / 0.07* | | |
+| XLE / S&P 500 | 0.35 / 0.07 | | |
 
-Correlations drift a lot. The latest 60-day correlation with WTI is 0.68 for E&P but only 0.11 for midstream and services. A full-sample beta should be read as an average, not a constant.
+The latest 60-day correlation with WTI is 0.68 for E&P and 0.11 for midstream and for services. The full-sample beta is an average over the window.
 
-## 2. Drawdowns in three shocks
+## Drawdowns
 
-Peak-to-trough within each window, using equal-weighted segment indices.
+Peak-to-trough inside each window in `src/analysis/returns.py`. The 2015–16 window is those two calendar years. The 2020 and 2022 windows are each calendar year, not a shorter event window.
 
-| Shock | Majors | E&P | Midstream | Refining | Services | XLE | S&P 500 | WTI |
+| Window | Majors | E&P | Midstream | Refining | Services | XLE | S&P 500 | WTI |
 |---|---|---|---|---|---|---|---|---|
-| 2015–16 oil bust | −33% | −43% | **−71%** | −31% | −39% | −36% | −13% | −57% |
-| 2020 COVID crash | −58% | **−79%** | −66% | −67% | −72% | −61% | −34% | −71% |
-| 2022 rate shock | −26% | −32% | −21% | −29% | **−41%** | −26% | −25% | −43% |
+| 2015–16 | −33.4% | −43.0% | −71.3% | −31.4% | −39.2% | −36.1% | −13.0% | −57.3% |
+| 2020 | −57.5% | −78.7% | −65.6% | −66.8% | −72.1% | −60.6% | −33.7% | −71.1% |
+| 2022 | −26.1% | −31.6% | −20.9% | −29.3% | −40.7% | −26.0% | −24.5% | −42.6% |
 
-## 3. Point-in-time fundamentals and clustering
+In the 2015–16 window, equal-weighted midstream fell more than WTI. In 2020, E&P fell the most. Midstream also has the highest segment median debt/capital (62.6%) in the latest 10-Ks. That ratio is a level, not a measured cause of the drawdown.
 
-Ratios come from 10-K XBRL facts that were **filed on or before the as-of date**, so the snapshot only uses information that was public at the time. The segment medians tell a coherent story:
-- Majors pay out the most (72% of operating cash flow in dividends and buybacks).
-- Midstream is the most levered (debt / capital 63%).
-- E&P has the highest capex intensity (25% of revenue) and the highest FCF yield (6.5%).
+## Fundamentals and clustering
 
-Clustering the 18 companies on these features gives an adjusted Rand index of 0.61 against the segment labels, with a silhouette of 0.27. Some features were imputed, so the complete-case check matters: across the 12 companies with no missing ratios, ARI rises to 0.76.
+Ratios use 10-K facts whose filing date is on or before the as-of date. Latest segment medians:
 
-## 4. Factor model
+- Majors: payout (dividends + buybacks) / operating cash flow 72.2%.
+- Midstream: debt / capital 62.6%.
+- E&P: capex / revenue 25.2%, and (operating cash flow − capex) / market cap 6.5%.
 
-The model regresses weekly segment returns on WTI, Henry Hub gas, the Brent–WTI spread (crack-spread proxy), the change in the 10-year yield and the Fama-French market, size and value factors, using HAC errors and walk-forward refits (156-week training window, refit weekly, scored against an expanding-mean baseline).
+k-means with k=5 on oil beta and these ratios has an adjusted Rand index of 0.61 against the segment labels, and a silhouette of 0.27. Thirteen of 108 feature cells are the universe median, flagged as imputed. On the 12 companies with no missing ratios, the ARI is 0.76. The five E&P names share one cluster. WMB is alone in its cluster. The other clusters mix segments.
+
+## Factor model
+
+Weekly segment excess returns on WTI, Henry Hub, the change in (Brent − WTI) / WTI, the change in the 10-year yield, and the Fama-French market, size, and value factors. Standard errors are HAC. The walk-forward fit uses 156 training weeks, then refits every week, and scores against an expanding-mean baseline.
 
 | Segment | In-sample R² | OOS R², same week | OOS R², lagged factors |
 |---|---|---|---|
@@ -56,26 +51,29 @@ The model regresses weekly segment returns on WTI, Henry Hub gas, the Brent–WT
 | Refining & marketing | 0.57 | 57.1% | −3.7% |
 | Oilfield services | 0.65 | 64.2% | −5.8% |
 
-The same-week result shows the exposures are stable. The lagged result is the honest headline: these factors do not predict next week's segment returns, and the leakage tests in `tests/` guard that claim.
+Same-week factors are that week's realized values, so that column is a fit, not a forecast. Lagged factors are last week's values. Those out-of-sample R² are negative for every segment. `tests/test_leakage.py` checks that the walk-forward does not use future rows.
 
-## 5. Market sizing (proxy)
+The Brent–WTI term is a stand-in. RBOB and heating-oil futures are not in the snapshot, so there is no 3-2-1 crack. There is no dollar-index series either.
 
-The 18 names reported **$1,278bn** of FY2025 revenue (17 of 18 companies; APA has no standard revenue tag). This is a measure of the scale of cash flows, not a market size. It is global and consolidated, it double counts along the chain (refiners buy producers' crude), and it includes pass-through product sales. The top-down figure (US crude production × WTI) is computed from the weekly-refreshed EIA snapshot; its current value is generated into the README's Findings section rather than typed here, so it never goes stale.
+## Market size
 
-## Limitations, stated plainly
+The 18 names reported $1,278bn of FY2025 revenue. Seventeen companies have a standard revenue tag; APA does not, and is left out rather than filled in. The total is global consolidated revenue. It counts the same barrel more than once when a refiner buys a producer's crude, and it includes product sales that pass through at market prices. It is a scale of reported sales, not a US market size.
 
-- **Survivorship bias.** The universe is 18 names that survived to today. Anadarko, Noble, Concho, Pioneer, Hess, Andeavor, Weatherford and others are excluded, so segment returns, especially E&P and services in 2015–16 and 2020, look better than an investor at the time would have experienced.
-- **Small segments.** With three to five names per segment, equal-weighted segment indices can be dominated by a single company.
-- **Proxies.** The crack spread is proxied by the Brent–WTI spread, because RBOB and heating-oil futures are not in the snapshot. There is no dollar-index factor.
-- **Missing tags are left blank, not estimated.** COP, PSX, VLO, APA, ET and FANG lack some ratios. Clustering imputes 13 of 108 cells with the universe median (flagged), so the complete-case ARI is reported alongside.
-- **Linear, full-sample betas.** Betas vary by regime (see the rolling correlations), and the scenario tool applies a single linear beta with a 95% band from its standard error. Real moves of ±30% are outside the data's typical weekly range.
-- **Not investment advice.** This is descriptive and sensitivity analysis only; nothing here is a trading signal.
+US field crude production in 2025 averaged 13,662 kb/d in the EIA snapshot. Valued at the monthly average WTI spot, that is about $326bn. The exact figure is regenerated into the README from `results/market_sizing.json`, with the caveats stored next to it (Cushing spot rather than realized wellhead prices; crude only; recent months are EIA estimates and get revised).
+
+## Limits
+
+- Survivorship. The 18 names are the ones that still trade. Segment returns, especially E&P and services in 2015–16 and 2020, omit names that were bought or went through bankruptcy.
+- Three to five names per segment. An equal-weighted index can be one company.
+- Missing XBRL tags stay blank. COP, PSX, VLO, APA, ET, and FANG are each missing at least one ratio.
+- The scenario tool multiplies a weekly oil beta by a WTI move and draws a 95% band from the beta's standard error. A 30% week is outside the usual range of the sample.
+- Nothing here is a trading signal.
 
 ## Reproduce
 
 ```bash
 make results    # results/*.json and charts from data/snapshot/
-make export     # web data for the explorer
-make test       # ruff, pytest (incl. leakage and point-in-time tests), vitest
-make web        # production build of the explorer
+make export     # JSON for the explorer
+make test       # ruff, pytest, vitest
+make web        # production build
 ```

@@ -1,4 +1,4 @@
-"""Pinned M2 headline numbers must reproduce exactly from the committed snapshot."""
+"""Pinned sizing, returns and fundamentals reproduce from the committed snapshot."""
 
 import json
 

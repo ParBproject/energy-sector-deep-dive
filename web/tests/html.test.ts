@@ -11,7 +11,7 @@ describe("index.html", () => {
     expect(fetched.length).toBeGreaterThan(5);
     expect(preloaded).toEqual(fetched);
   });
-  it("has lang, a description and a favicon (Lighthouse SEO / best practices)", () => {
+  it("has lang, a description and a favicon", () => {
     expect(html).toMatch(/<html lang="en">/);
     expect(html).toMatch(/<meta name="description" content="[^"]{50,}"/);
     expect(html).toMatch(/<link rel="icon"/);

@@ -4,22 +4,15 @@
 
 [![Energy Sector Explorer](docs/img/hero.png)](https://parbproject.github.io/energy-sector-deep-dive/)
 
-**[Open the live explorer →](https://parbproject.github.io/energy-sector-deep-dive/)** · **[Read the findings →](docs/findings.md)**
+**[Open the explorer](https://parbproject.github.io/energy-sector-deep-dive/)** · **[Notes on the results](docs/findings.md)**
 
-How do the five segments of US oil & gas (integrated majors, producers, pipelines, refiners
-and oilfield services) actually trade against oil, gas, XLE and the S&P 500, from the 2015–16
-bust through 2020 and 2022 to today? This repo is a reproducible, point-in-time research
-pipeline whose results are presented in an interactive explorer.
+How five groups of US oil and gas companies (integrated majors, producers, pipelines, refiners, and oilfield services) have moved with oil, gas, XLE, and the S&P 500 since 2015. The calculations are in `src/`. The same outputs feed the notebooks and the [explorer](https://parbproject.github.io/energy-sector-deep-dive/).
 
-It is the companion to [commodity-price-forecaster](https://github.com/ParBproject/commodity-price-forecaster).
-Both use the same WTI, Brent and Henry Hub series (Yahoo `CL=F`, `BZ=F`, `NG=F`).
+This sits next to [commodity-price-forecaster](https://github.com/ParBproject/commodity-price-forecaster). Both use Yahoo `CL=F`, `BZ=F`, and `NG=F` for WTI, Brent, and Henry Hub.
 
-> Status: **Milestone 6 (polish and launch)** complete. Live: https://parbproject.github.io/energy-sector-deep-dive/
-> Employer-facing write-up with limitations: [`docs/findings.md`](docs/findings.md). Findings below are generated from `results/*.json`.
+## Universe
 
-## Scope
-- **Period:** 2015-01-02 to present, daily prices; quarterly and annual fundamentals.
-- **Universe** (fixed as of 2015, see [`config/universe.yaml`](config/universe.yaml)):
+Fixed as of 2015-01-02. Current tickers, and notes on renames and predecessors, are in [`config/universe.yaml`](config/universe.yaml).
 
 | Segment | Tickers |
 |---|---|
@@ -30,35 +23,31 @@ Both use the same WTI, Brent and Henry Hub series (Yahoo `CL=F`, `BZ=F`, `NG=F`)
 | Oilfield services | SLB, HAL, BKR |
 | Benchmarks | XLE, SPY / ^GSPC |
 
-- **Survivorship bias, stated plainly:** these are the names that survived. Anadarko, Noble,
-  Concho, Pioneer, Marathon Oil, Hess, Cimarex, Chesapeake (old equity), Whiting, Spectra,
-  Tesoro/Andeavor, Cameron, FMC Technologies and Weatherford were in the 2015 opportunity set
-  and are listed with their fate in the config. Segment returns will be read with that in mind.
+These are names that still trade. Anadarko, Noble, Concho, Pioneer, Marathon Oil, Hess, Cimarex, Chesapeake (old equity), Whiting, Spectra, Tesoro/Andeavor, Cameron, FMC Technologies, and Weatherford were in the 2015 set. The config lists what happened to each. Segment returns do not include them.
 
-## Data sources
+## Data
+
 | Source | What | Access |
 |---|---|---|
-| [yfinance](https://github.com/ranaroussi/yfinance) | Adjusted daily closes, benchmarks, front-month futures | keyless |
-| [FRED](https://fred.stlouisfed.org/) | WTI/Brent/Henry Hub spot, 10y and 3m rates, CPI, industrial production | `FRED_API_KEY` optional; falls back to keyless `fredgraph.csv` |
-| [SEC EDGAR XBRL](https://www.sec.gov/edgar/sec-api-documentation) | Company facts with **filing dates** for point-in-time fundamentals | keyless; descriptive `SEC_USER_AGENT` required |
-| [EIA API v2](https://www.eia.gov/opendata/) | US crude production, stocks, rotary rigs (refreshed weekly, see [Live EIA data](#live-eia-data)) | `EIA_API_KEY` required |
-| [Baker Hughes rig count](https://rigcount.bakerhughes.com/) | Weekly North America rigs | manual file (site blocks scripts) or EIA mirror |
-| [Fama-French](https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html) | Daily 3 factors | keyless |
+| [yfinance](https://github.com/ranaroussi/yfinance) | Adjusted daily closes, benchmarks, front-month futures | no key |
+| [FRED](https://fred.stlouisfed.org/) | WTI, Brent, and Henry Hub spot, 10y and 3m rates, CPI, industrial production | `FRED_API_KEY` optional; otherwise keyless `fredgraph.csv` |
+| [SEC EDGAR XBRL](https://www.sec.gov/edgar/sec-api-documentation) | Company facts, with filing dates | no key; `SEC_USER_AGENT` required |
+| [EIA API v2](https://www.eia.gov/opendata/) | US crude production, stocks, rotary rigs | `EIA_API_KEY` |
+| [Baker Hughes rig count](https://rigcount.bakerhughes.com/) | Weekly North America rigs | manual file, or the EIA series above |
+| [Fama-French](https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html) | Daily 3 factors | no key |
 
-Column-level detail: [`docs/data_dictionary.md`](docs/data_dictionary.md). Every pull is cached
-to `data/raw/` with its fetch date; a small real snapshot (≈0.5 MB) is committed in
-`data/snapshot/` so tests and later milestones run offline.
+Columns are listed in [`docs/data_dictionary.md`](docs/data_dictionary.md). Raw pulls land in `data/raw/` (gitignored) with the fetch date. A small snapshot in `data/snapshot/` is committed so tests and the explorer data can be rebuilt offline.
 
-## Explorer demo
+## Explorer
 
-![Explorer demo: segment filter, date-range brush, company drill-down, pins and the oil scenario](docs/img/demo.gif)
+![Explorer: segment filter, date range, company panel, and the oil scenario](docs/img/demo.gif)
 
-Six linked views (overview, returns and drawdowns, fundamentals, clusters, factor model, oil scenario) share one URL-synced state, so any view can be linked to directly. The explorer is usable by keyboard (skip link, visible focus rings, a company picker as a keyboard path to the drill-down, Escape closes the detail panel and returns focus). Every chart carries an ARIA label and an ECharts-generated text description, and the app honours reduced motion. axe reports 0 violations across all views at 1280 px and 390 px. Lighthouse (mobile, live site, 2026-10-22): performance 94–96, accessibility 100, best practices 100, SEO 100.
+Six views share one set of filters, stored in the URL: overview, returns, fundamentals, clusters, factor model, and oil scenario. There is a skip link, a visible focus ring, and a company picker. Escape closes the detail panel. Charts have an accessible name. Motion follows `prefers-reduced-motion`.
 
 <!-- findings:start -->
-## Findings (M2)
+## Returns, sizing and fundamentals
 
-_Generated by `python -m scripts.run_m2` from `results/*.json`. Data as of 2026-10-22._
+_From `results/*.json`, via `python -m scripts.run_m2`. Data as of 2026-10-22._
 
 ### Oil beta
 ![Oil beta](docs/img/oil_beta.png)
@@ -107,11 +96,11 @@ Not computed where a company files the input under a non-standard tag (left blan
 <!-- findings:end -->
 
 <!-- m3-findings:start -->
-## Findings (M3)
+## Clustering, factors and scenarios
 
-_Generated by `python -m scripts.run_m3` from `results/*.json`._
+_From `results/*.json`, via `python -m scripts.run_m3`._
 
-### Do fundamentals rediscover the segments?
+### Clustering vs the five segments
 ![Clusters](docs/img/clusters.png)
 
 - k-means (k=5): silhouette 0.27, adjusted Rand vs the 5 segments **0.61**. Ward hierarchical: silhouette 0.27, ARI 0.61.
@@ -121,7 +110,7 @@ _Generated by `python -m scripts.run_m3` from `results/*.json`._
 ### Factor model (weekly, HAC)
 ![Factor t-stats](docs/img/factor_tstats.png)
 
-- Sample 2015-01-09 to 2026-08-28 (608 weeks). Crack-spread proxy: weekly change in (Brent - WTI) / WTI from BZ=F and CL=F futures; RBOB/heating-oil futures not in snapshot. Dollar: unavailable: no dollar index series in snapshot.
+- Sample 2015-01-09 to 2026-08-28 (608 weeks). Crack-spread proxy: weekly change in (Brent - WTI) / WTI from BZ=F and CL=F futures; RBOB/heating-oil futures not in snapshot. No dollar-index series is in the snapshot.
 
 | Segment | In-sample R² | OOS R², same-week factors | OOS R², last week's factors |
 |---|---|---|---|
@@ -131,7 +120,7 @@ _Generated by `python -m scripts.run_m3` from `results/*.json`._
 | Refining & marketing | 0.57 | 57.1% | -3.7% |
 | Oilfield services | 0.65 | 64.2% | -5.8% |
 
-OOS R² is against an expanding historical-mean baseline, refit weekly after 156 training weeks. Same-week factors show the exposures are stable; last week's factors show they do not forecast next week.
+Out-of-sample R² is versus an expanding historical mean, refit weekly after 156 training weeks. The same-week column uses that week's factors. The last column uses the previous week's factors.
 
 ![Walk-forward OOS R²](docs/img/oos_r2.png)
 
@@ -149,105 +138,65 @@ OOS R² is against an expanding historical-mean baseline, refit weekly after 156
 Forecaster tie-in: the latest one-step WTI forecast published by [commodity-price-forecaster](https://github.com/ParBproject/commodity-price-forecaster) (ARIMA(1,1,1), week 2026-09-27, commit `78b63d2`) implied -0.07%; WTI actually moved -7.87%. That step is already realized, so the explorer defaults to a slider and offers the forecast only as a preset.
 <!-- m3-findings:end -->
 
-## Roadmap
-1. **M1 – Scope and data** ✅ universe, cached loaders, point-in-time EDGAR, offline snapshot, CI workflow (staged).
-2. **M2 – Core analyses** ✅ market sizing (bottom-up proxy), oil beta with HAC errors, rolling correlations, shock drawdowns, point-in-time fundamentals. Notebooks in `notebooks/`.
-3. **M3 – Modelling** ✅ clustering vs segments (silhouette, ARI), weekly HAC factor model with walk-forward OOS R², leakage tests, oil scenario module fed by the commodity forecaster (`src/scenarios/`).
-4. **M4 – Design system and app shell** ✅ `web/`: Vite + React + TS, tokens in one file shared with the Python charts, ECharts theme, sticky filters, KPI strip, chart cards, 390 px mobile layout, styleguide route.
-
-   ![App shell, desktop](docs/img/ui_m4_desktop.png)
-5. **M5 – Interactive explorer** ✅ six views from exported data, Zustand store synced to the URL hash, linked filters, brush-to-zoom, synced hover, sector → segment → company drill-down, compare pins, oil-scenario slider with the commodity forecaster as a dated preset (a what-if tool, not a signal). Deployed to GitHub Pages from `gh-pages` (no workflow).
-6. **M6 – Polish and launch** ✅ accessibility pass (axe: 0 violations), ECharts and Framer Motion code-split, Lighthouse mobile ≥ 90, demo GIF and hero image, [findings write-up](docs/findings.md), cross-links with commodity-price-forecaster.
-
 ## How to run
+
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 
-pytest -q            # offline: uses data/snapshot/ and mocked HTTP
+pytest -q
 ruff check . && ruff format --check .
 
 # optional keys
 export FRED_API_KEY=...        # otherwise keyless fredgraph.csv
-export EIA_API_KEY=...         # needed only to refresh data/snapshot/eia.* (python -m scripts.refresh_eia)
-export SEC_USER_AGENT="Your Name you@example.org"
+export EIA_API_KEY=...         # only to refresh data/snapshot/eia.*
+export SEC_USER_AGENT="Your Name you@example.com"
 
-python -m scripts.build_snapshot   # refetch everything into data/raw/ and rebuild data/snapshot/
-python -m scripts.run_m2           # offline: results/*.json, docs/img/*.png, README findings
-python -m scripts.run_m3           # offline: clustering, factor model, scenarios
-python -m scripts.make_notebooks   # rebuild and execute notebooks/0*.ipynb
+python -m scripts.build_snapshot   # refetch into data/raw/ and rebuild data/snapshot/
+python -m scripts.run_m2           # results for sizing, returns, fundamentals; README block; charts
+python -m scripts.run_m3           # clustering, factor model, scenarios
+python -m scripts.make_notebooks   # rebuild and execute notebooks/
 ```
 
-**SEC User-Agent.** SEC EDGAR asks automated clients for a `"Name email"` User-Agent. The code reads it from the
-`SEC_USER_AGENT` environment variable; if that is unset it falls back to the project contact
-`Par Bahrae githubproproject@proton.me`. In GitHub Actions the value comes from the `SEC_USER_AGENT` repository secret.
-Set your own when you re-fetch: `export SEC_USER_AGENT="Your Name you@example.com"`.
+SEC asks clients for a `Name email` User-Agent. The code reads `SEC_USER_AGENT`. If that is unset it uses `Par Bahrae githubproproject@proton.me`. In GitHub Actions the value comes from the `SEC_USER_AGENT` repository secret.
 
-## Repo layout
+## Layout
+
 ```
-config/universe.yaml   fixed 2015 universe, segments, M&A / bankruptcy notes
+config/universe.yaml   2015 universe, segments, and M&A / bankruptcy notes
 src/data/              cached loaders: prices, fred, edgar, eia, rigs, famafrench, snapshot
-src/analysis/          returns, betas, fundamentals, clustering, regression
-src/scenarios/         oil-price what-if mapping
-src/export/            JSON for the web app
-scripts/               build_snapshot.py, refresh_eia.py (weekly EIA pull)
-data/snapshot/         committed real data + manifest.json
-notebooks/ results/ docs/img/ web/
-tests/                 loaders, cache, point-in-time filing dates, snapshot
+src/analysis/          returns, fundamentals, clustering, factor model
+src/scenarios/         oil-price what-if
+src/export/            JSON for the explorer, and the README numbers
+scripts/               build_snapshot.py, refresh_eia.py
+data/snapshot/         committed data and manifest.json
+notebooks/  results/  docs/img/  web/
+tests/
 ```
 
-## Live EIA data
-The EIA series are pulled, validated, committed and deployed by
-[`.github/workflows/eia-refresh.yml`](.github/workflows/eia-refresh.yml).
+## EIA refresh
 
-| Series | EIA id (API v2 route) | Frequency | Used for |
+[`.github/workflows/eia-refresh.yml`](.github/workflows/eia-refresh.yml) pulls three series, checks them, and only then replaces `data/snapshot/eia.csv.gz` and `eia_meta.json`.
+
+| Series | EIA id | Frequency | Used for |
 |---|---|---|---|
-| US field crude production, kb/d | `MCRFPUS2` (`petroleum/crd/crpdn`) | monthly | top-down market size (x FRED WTI), Overview chart |
-| US commercial crude stocks ex-SPR, kbbl | `WCESTUS1` (`petroleum/stoc/wstk`) | weekly | Overview chart |
-| US crude + gas rotary rigs | `E_ERTRRO_XR0_NUS_C` (`petroleum/crd/drill`) | monthly, published with a lag of several months | Overview chart |
+| US field crude production, kb/d | `MCRFPUS2` | monthly | top-down size (times FRED WTI), overview chart |
+| US commercial crude stocks ex-SPR, kbbl | `WCESTUS1` | weekly | overview chart |
+| US crude and gas rotary rigs | `E_ERTRRO_XR0_NUS_C` | monthly, published with a lag | overview chart |
 
-**Schedule.** Thursdays 15:30 UTC (after EIA's Wednesday Weekly Petroleum Status Report), plus
-manual runs.
+The workflow runs Thursdays at 15:30 UTC, after EIA's Wednesday Weekly Petroleum Status Report, and on manual dispatch. It needs the `EIA_API_KEY` secret. A series that is empty, non-numeric, outside a wide physical range, duplicated, stale, or shorter than the snapshot already committed fails the run. Nothing is filled in or carried forward, and the previous files stay. On success it rebuilds `results/`, the number blocks in this file, and `web/public/data/`, runs the tests, commits the data to `main`, and pushes the explorer to `gh-pages`. EIA charts show the as-of date from `eia_meta.json`.
 
-**Pipeline.** One job, `permissions: contents: write`, using the `EIA_API_KEY` repository secret:
-1. `python -m scripts.refresh_eia` fetches all three series from 2015 and validates each one:
-   expected columns and series id, non-empty, numeric, wide physical sanity ranges, unique and
-   ascending periods, history starting in 2015, latest period not in the future and not stale,
-   and never moving backwards or losing rows compared with the committed snapshot.
-2. Only if **every** series passes, `data/snapshot/eia.csv.gz` and `data/snapshot/eia_meta.json`
-   are swapped in atomically. `eia_meta.json` carries the as-of date (UTC retrieval date), the
-   retrieval timestamp and each series' latest period.
-3. `run_m2`, `run_m3` and `src.export.web` regenerate `results/`, the README findings and
-   `web/public/data/` from the new snapshot, then ruff, pytest and the web tests and build run as a
-   gate. The exact-match result tests therefore check the snapshot that run is about to commit.
-4. The bot commits straight to `main` as `data: EIA refresh, data as of YYYY-MM-DD`. `main` has no
-   branch protection and the change is data only and already tested in step 3, so an auto-merged PR
-   would add nothing. If `main` becomes protected, switch this step to a PR.
-5. The explorer is rebuilt and pushed to `gh-pages`; GitHub Pages then publishes it. Every EIA chart
-   shows `Data as of <date> · Source: U.S. EIA`, read from `eia_meta.json` via `eia.json`.
-
-**Failure behaviour.** If EIA returns an error, a malformed or truncated response, or any series
-fails validation, nothing is written: the last good snapshot stays, the run fails (red) and the
-exact error is in the run summary. No value is ever filled, interpolated or carried forward. The
-key is never printed: request errors are reported without the URL.
-
-**Run it manually.** Actions → *EIA refresh* → *Run workflow*, or
-`gh workflow run eia-refresh.yml`. Locally: `EIA_API_KEY=... python -m scripts.refresh_eia`
-(add `--check` to fetch and validate without writing). PRs that touch the pipeline run a live
-fetch into a scratch directory and upload it as the `eia-preview` artifact, without committing.
+A pull request that touches the EIA code fetches into a scratch directory and uploads an `eia-preview` artifact. It does not commit. Locally: `EIA_API_KEY=... python -m scripts.refresh_eia` (`--check` validates without writing).
 
 ## Deploying the explorer
-The *EIA refresh* workflow rebuilds and deploys it on every run. To deploy by hand, build with
-`cd web && npm run build` (Vite `base` is `/energy-sector-deep-dive/`), then push the contents of
-`web/dist` plus `.nojekyll` to the `gh-pages` branch. Pages serves `gh-pages /`.
+
+The EIA workflow rebuilds and deploys it. To deploy by hand: `cd web && npm run build` (the Vite `base` is `/energy-sector-deep-dive/`), then push `web/dist` plus `.nojekyll` to `gh-pages`.
 
 ## License
+
 MIT
 
-> CI: the workflow is staged at [`docs/ci.yml.proposed`](docs/ci.yml.proposed). Move it to
-> `.github/workflows/ci.yml` (needs a token with `workflow` scope, or the GitHub web UI) to enable ruff + pytest on every PR.
-
-## Explorer screenshots
+## Screenshots
 
 ![Overview](docs/img/ui_m6_desktop_overview.png)
 ![Returns with company panel](docs/img/ui_m6_desktop_returns_panel.png)

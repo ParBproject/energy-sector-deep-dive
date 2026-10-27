@@ -1,6 +1,6 @@
 """Sensitivity analysis: map a WTI % move to each segment's expected % move.
 
-This is SENSITIVITY ANALYSIS from historical co-movement, not a trading signal or forecast.
+This is a sensitivity from historical co-movement, not a trading signal or forecast.
 It uses a univariate weekly oil beta (segment excess return on CL=F return, HAC errors), so
 the expected move already folds in whatever usually moves with oil. Two bands are given:
 - ``param``: 95% band from the beta's HAC standard error only;

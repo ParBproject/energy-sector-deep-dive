@@ -1,6 +1,6 @@
 name: EIA refresh
 # Weekly pull of the EIA series used by the deep dive -> validated snapshot commit on main
-# -> regenerated results -> rebuilt explorer on gh-pages. See README "Live EIA data".
+# -> regenerated results -> rebuilt explorer on gh-pages. See README "EIA refresh".
 on:
   schedule:
     - cron: "30 15 * * 4" # Thursdays 15:30 UTC, after EIA's Wednesday WPSR release

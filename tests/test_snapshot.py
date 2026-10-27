@@ -31,3 +31,10 @@ def test_manifest_records_unavailable_sources():
     assert m["yfinance"]["ok"] and m["edgar"]["ok"]
     for k in ("eia", "rigcount"):
         assert m[k]["ok"] or m[k]["reason"]
+
+
+def test_manifest_eia_flag_matches_the_file():
+    from src.data import eia_snapshot
+
+    recorded = snapshot.manifest()["sources"]["eia"]["ok"]
+    assert recorded is (eia_snapshot.meta() is not None)

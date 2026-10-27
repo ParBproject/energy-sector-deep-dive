@@ -1,4 +1,4 @@
-"""Compute M2 results, pin them in results/*.json, export charts, refresh README findings."""
+"""Write sizing, returns and fundamentals, save the charts, and refresh the README."""
 
 from __future__ import annotations
 
