@@ -2,6 +2,8 @@ import type { AllData } from "../data/types";
 import { SEGMENT_LABELS, pct, usdBn } from "../format";
 
 export function KpiStrip({ data }: { data: AllData | null }) {
+  const year = data ? String(data.sizing.latest_fiscal_year) : "";
+  const reporting = data ? data.sizing.companies_reporting_by_year[year] : undefined;
   const items = data
     ? [
         {
@@ -12,7 +14,7 @@ export function KpiStrip({ data }: { data: AllData | null }) {
         {
           label: `FY${data.sizing.latest_fiscal_year} revenue`,
           value: usdBn(data.sizing.total_revenue_latest_usd),
-          sub: "18-name universe, 10-K",
+          sub: `${reporting} of ${data.fundamentals.universe_size} companies reported, 10-K`,
         },
         {
           label: "Clusters vs segments",

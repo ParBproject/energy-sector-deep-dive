@@ -55,10 +55,10 @@ Comparative prior-period values re-reported in later filings appear as separate 
 `date`, `mkt_rf`, `smb`, `hml`, `rf`: daily Fama-French 3 factors, converted from percent to decimal.
 Ken French publishes with a lag of about one to two months.
 
-## Not in the snapshot yet
+## EIA and rig counts
 | source | loader | status |
 |---|---|---|
-| EIA API v2 (crude production, crude stocks, rig count) | `src/data/eia.py`, `src/data/eia_snapshot.py` | committed in `data/snapshot/eia.csv.gz` (`name, series, period, date, value, units`) + `eia_meta.json`; refreshed weekly by `scripts/refresh_eia.py` with `EIA_API_KEY` |
-| Baker Hughes rig count | `src/data/rigs.py` | rigcount.bakerhughes.com returns HTTP 403 to scripts. Drop a downloaded file at `data/manual/rig_count.csv` (or set `RIG_COUNT_FILE`), or set `EIA_API_KEY` to use EIA's mirror |
+| EIA API v2 (crude production, crude stocks, rig count) | `src/data/eia.py`, `src/data/eia_snapshot.py` | committed in `data/snapshot/eia.csv.gz` (`name, series, period, date, value, units`) and `eia_meta.json`; refreshed weekly by `scripts/refresh_eia.py` with `EIA_API_KEY` |
+| Baker Hughes rig count | `src/data/rigs.py` | rigcount.bakerhughes.com returns HTTP 403 to scripts. A downloaded file can go at `data/manual/rig_count.csv` (or `RIG_COUNT_FILE`). The explorer uses the EIA rig series instead. |
 
 No source is ever filled with synthetic or interpolated data. A missing source stays missing.

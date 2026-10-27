@@ -102,8 +102,8 @@
       "last": "2026-08-31"
     },
     "eia": {
-      "ok": false,
-      "reason": "EIA_API_KEY not set"
+      "ok": true,
+      "reason": "refreshed separately by scripts/refresh_eia.py (data/snapshot/eia.*)"
     },
     "rigcount": {
       "ok": false,

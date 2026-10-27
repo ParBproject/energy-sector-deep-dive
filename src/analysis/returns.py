@@ -18,6 +18,7 @@ from src.analysis.common import (
 
 HAC_LAGS = 5  # one trading week of serial correlation
 WINDOW = 60
+# Calendar spans. The drawdown is peak-to-trough inside the span, not a hand-picked trough date.
 SHOCKS = {
     "2015-16 oil bust": ("2015-01-02", "2016-12-30"),
     "2020 COVID crash": ("2020-01-02", "2020-12-31"),

@@ -1,4 +1,4 @@
-"""Pinned M3 results reproduce from the snapshot; README M3 section matches results."""
+"""Pinned clustering, factor and scenario results reproduce from the snapshot."""
 
 import json
 

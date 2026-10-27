@@ -2,10 +2,9 @@
 
 Factors (weekly, Friday close to Friday close):
 - ``oil``: CL=F return;  ``gas``: NG=F return
-- ``brent_wti``: weekly change in the Brent-WTI futures spread as a share of WTI. This is the
-  documented CRACK-SPREAD PROXY: RBOB/heating-oil futures are not in the snapshot, so a true
-  3-2-1 crack cannot be built. US refiners buy WTI-linked crude and sell Brent-linked products,
-  so a wider Brent-WTI spread historically widened their margin. It is a proxy, not a crack.
+- ``brent_wti``: weekly change in the Brent-WTI futures spread as a share of WTI. RBOB and
+  heating-oil futures are not in the snapshot, so this stands in for a crack spread. It is
+  not a 3-2-1 crack.
 - ``d10y``: weekly change in the 10-year Treasury yield (FRED DGS10), in percentage points
 - ``mkt_rf``, ``smb``, ``hml``: Fama-French 3 factors compounded to weekly
 - dollar proxy: none in the snapshot (no DXY/DTWEXBGS series); omitted and reported.

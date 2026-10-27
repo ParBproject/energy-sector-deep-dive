@@ -14,6 +14,7 @@ export interface ReturnsResult {
 export interface SizingResult {
   latest_fiscal_year: number;
   total_revenue_latest_usd: number;
+  companies_reporting_by_year: Record<string, number>;
   segment_revenue_usd: Record<Segment, Record<string, number | null>>;
   segment_share_latest: Record<Segment, number>;
   missing_revenue_latest_year: string[];
@@ -35,6 +36,7 @@ export interface CompanyFundamentals extends Record<Ratio, number | null> {
 }
 export interface FundamentalsResult {
   as_of: string;
+  universe_size: number;
   definitions: Record<Ratio, string>;
   segment_median: Record<Segment, Record<Ratio, number | null>>;
   companies: Record<string, CompanyFundamentals>;

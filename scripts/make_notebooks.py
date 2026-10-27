@@ -1,4 +1,4 @@
-"""Build and execute the three M2 narrative notebooks (outputs are committed)."""
+"""Build and execute the notebooks in notebooks/. Outputs are committed."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ NOTEBOOKS = {
     "01_market_sizing.ipynb": [
         (
             "md",
-            "# 01 · Market sizing\n\nThe textbook top-down size of US upstream is *US crude output x WTI*. "
+            "# 01 · Market sizing\n\nThe top-down figure used here is *US crude output x WTI*. "
             "The volume comes from the committed EIA snapshot (`MCRFPUS2`, refreshed weekly by "
             "`.github/workflows/eia-refresh.yml`) and the price from FRED WTI; if a year is incomplete "
             "the top-down is reported as unavailable, never estimated. Alongside it we build a bottom-up "
@@ -38,9 +38,9 @@ NOTEBOOKS = {
         ("code", "Image('../docs/img/segment_revenue.png')"),
         (
             "md",
-            "**Takeaway.** Revenue is dominated by majors and refiners because their sales pass crude and "
-            "products through at market prices; upstream and services are small by revenue but, as notebook 02 "
-            "shows, carry most of the oil risk. The top-down value of US crude output is shown above.",
+            "Revenue is dominated by majors and refiners: their sales include crude and products that pass "
+            "through at market prices. Upstream and services are small on that measure. Notebook 02 shows "
+            "they have the higher oil betas. The top-down value of US crude output is above.",
         ),
     ],
     "02_returns_beta_drawdowns.ipynb": [
@@ -79,9 +79,9 @@ NOTEBOOKS = {
         (
             "code",
             "hi, lo = res['highest_beta_segment'], res['lowest_beta_segment']\n"
-            "display(Markdown(f\"**Takeaway.** {hi} has the highest oil beta ({res['betas']['segments'][hi]['beta']:.2f}), "
-            "{lo} the lowest ({res['betas']['segments'][lo]['beta']:.2f}). Even the highest R² is modest: oil explains "
-            'well under half of daily segment variance."))',
+            "display(Markdown(f\"{hi} has the highest oil beta ({res['betas']['segments'][hi]['beta']:.2f}), "
+            "{lo} the lowest ({res['betas']['segments'][lo]['beta']:.2f}). The highest segment R² is still "
+            'under a half, so oil does not explain most of the daily variance."))',
         ),
     ],
     "03_fundamentals.ipynb": [
@@ -144,8 +144,8 @@ NOTEBOOKS = {
         ("code", "Image('../docs/img/clusters.png')"),
         (
             "code",
-            "display(Markdown(f\"**Takeaway.** Clusters recover the segments only partly (ARI {res['k5']['kmeans']['adjusted_rand_vs_segments']:.2f}): "
-            'producers group cleanly, while majors land with refiners on low leverage and high payouts, and WMB stands alone as the most levered, highest-reinvestment name."))',
+            "display(Markdown(f\"Clusters line up with the five segments only partly (ARI {res['k5']['kmeans']['adjusted_rand_vs_segments']:.2f}). "
+            'The E&P names share one cluster. WMB is in a cluster by itself. The other clusters mix segments."))',
         ),
     ],
     "05_factor_model.ipynb": [
@@ -173,9 +173,9 @@ NOTEBOOKS = {
         ("code", "Image('../docs/img/oos_r2.png')"),
         (
             "md",
-            "**Takeaway.** The exposures are real and stable: same-week factors explain more than half of weekly variance out of sample. "
-            "Last week's factors forecast nothing, with out-of-sample R² below zero against both baselines. That is what an efficient market predicts, "
-            "and it is why the scenario tool is framed as sensitivity analysis.",
+            "Same-week factors explain more than half of weekly variance out of sample. "
+            "Last week's factors do not: out-of-sample R² is below zero against both baselines. "
+            "The scenario notebook is a sensitivity, not a forecast.",
         ),
     ],
     "06_scenarios.ipynb": [

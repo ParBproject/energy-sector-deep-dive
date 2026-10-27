@@ -1,4 +1,4 @@
-"""Small committed snapshot of real fetched data, so tests and later milestones run offline.
+"""Committed snapshot of fetched data, so tests run offline.
 
 Build with ``python -m scripts.build_snapshot``; read with the helpers below.
 """

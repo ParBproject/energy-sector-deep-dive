@@ -1,4 +1,4 @@
-"""Shared helpers for M2 analyses. Everything reads the committed snapshot only."""
+"""Helpers shared by the analyses. Everything reads the committed snapshot only."""
 
 from __future__ import annotations
 
