@@ -1,0 +1,112 @@
+{
+  "as_of": "2026-10-22",
+  "latest_fiscal_year": 2025,
+  "approach": "bottom-up: summed reported revenue by segment (10-K, point-in-time)",
+  "topdown_status": {
+    "available": true,
+    "year": 2025,
+    "method": "sum over months of EIA MCRFPUS2 (kb/d) x 1000 x days x mean FRED DCOILWTICO",
+    "us_crude_production_bbl": 4986655000.0,
+    "us_crude_production_avg_kbd": 13662.068493,
+    "us_crude_value_usd": 325914605204.91064,
+    "eia_as_of": "2026-10-23",
+    "caveats": [
+      "Wellhead value at WTI Cushing spot; realized prices differ by grade and basin.",
+      "Crude only: excludes natural gas, NGLs and refined products.",
+      "Production for recent months is EIA's estimate and is revised in later releases."
+    ]
+  },
+  "segment_revenue_usd": {
+    "majors": {
+      "2016": 339460000000.0,
+      "2017": 418669000000.0,
+      "2018": 495278000000.0,
+      "2019": 448124000000.0,
+      "2020": 294978000000.0,
+      "2021": 493933000000.0,
+      "2022": 738426000000.0,
+      "2023": 601672000000.0,
+      "2024": 607122000000.0,
+      "2025": 580213000000.0
+    },
+    "upstream": {
+      "2016": 30374739000.0,
+      "2017": 37845320000.0,
+      "2018": 53935399000.0,
+      "2019": 55028000000.0,
+      "2020": 40790000000.0,
+      "2021": 63601000000.0,
+      "2022": 91148000000.0,
+      "2023": 71012000000.0,
+      "2024": 72723000000.0,
+      "2025": 76439000000.0
+    },
+    "midstream": {
+      "2016": 61269934000.0,
+      "2017": 74432907000.0,
+      "2018": 89510196000.0,
+      "2019": 85787367000.0,
+      "2020": 66915242000.0,
+      "2021": 111194309000.0,
+      "2022": 142427892000.0,
+      "2023": 122504000000.0,
+      "2024": 129972000000.0,
+      "2025": 148052000000.0
+    },
+    "refiners": {
+      "2016": 223215000000.0,
+      "2017": 271067000000.0,
+      "2018": 314580000000.0,
+      "2019": 326765000000.0,
+      "2020": 198820000000.0,
+      "2021": 345436000000.0,
+      "2022": 523826000000.0,
+      "2023": 440544000000.0,
+      "2024": 411898000000.0,
+      "2025": 387762000000.0
+    },
+    "services": {
+      "2016": 56779000000.0,
+      "2017": 68239000000.0,
+      "2018": 79687000000.0,
+      "2019": 79163000000.0,
+      "2020": 58751000000.0,
+      "2021": 58726000000.0,
+      "2022": 69544000000.0,
+      "2023": 81659000000.0,
+      "2024": 87062000000.0,
+      "2025": 85625000000.0
+    }
+  },
+  "total_revenue_latest_usd": 1278091000000.0,
+  "segment_share_latest": {
+    "majors": 0.453968,
+    "upstream": 0.059807,
+    "midstream": 0.115838,
+    "refiners": 0.303392,
+    "services": 0.066994
+  },
+  "companies_reporting_by_year": {
+    "2016": 18,
+    "2017": 18,
+    "2018": 18,
+    "2019": 18,
+    "2020": 18,
+    "2021": 17,
+    "2022": 17,
+    "2023": 17,
+    "2024": 17,
+    "2025": 17
+  },
+  "missing_revenue_latest_year": [
+    "APA"
+  ],
+  "wti_avg_latest_year_usd_bbl": 65.388105,
+  "caveats": [
+    "Revenue is global and consolidated, not US-only.",
+    "Segments double count: refiners' revenue includes crude bought from producers.",
+    "Majors' and refiners' revenue include pass-through product sales, so revenue overstates value added; it measures scale of flows, not market value.",
+    "Survivor universe of 18 names: excludes private producers and acquired/bankrupt names.",
+    "Companies without a standard us-gaap revenue tag are left out, not estimated."
+  ]
+}
