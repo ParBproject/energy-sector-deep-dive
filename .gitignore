@@ -13,10 +13,3 @@ web/dist/
 data/raw/*
 !data/raw/.gitkeep
 *.tsbuildinfo
-
-# Local agent tooling
-.cursor/
-.cursorrules
-AGENTS.md
-CLAUDE.md
-.claude/
