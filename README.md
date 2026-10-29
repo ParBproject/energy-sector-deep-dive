@@ -76,7 +76,7 @@ _From `results/*.json`, via `python -m scripts.run_m2`. Data as of 2026-10-22._
 ### Market sizing (proxy)
 ![Segment revenue](docs/img/segment_revenue.png)
 
-- Top-down: US field crude output in 2025 was 13,662 kb/d (4.99bn bbl), worth **$326bn** at monthly average WTI (EIA MCRFPUS2 x FRED DCOILWTICO; EIA data as of 2026-10-23). Wellhead value at WTI Cushing spot; realized prices differ by grade and basin. Crude only: excludes natural gas, NGLs and refined products. Production for recent months is EIA's estimate and is revised in later releases.
+- Top-down: US field crude output in 2025 was 13,662 kb/d (4.99bn bbl), worth **$326bn** at monthly average WTI (EIA MCRFPUS2 x FRED DCOILWTICO; EIA data as of 2026-10-29). Wellhead value at WTI Cushing spot; realized prices differ by grade and basin. Crude only: excludes natural gas, NGLs and refined products. Production for recent months is EIA's estimate and is revised in later releases.
 - Bottom-up proxy: the universe reported **$1,278bn** of FY2025 revenue (17 of 18 companies; missing: APA). Average WTI in 2025: $65.39/bbl.
 - Shares of that revenue: Integrated majors 45.4%, Exploration & production 6.0%, Pipelines & midstream 11.6%, Refining & marketing 30.3%, Oilfield services 6.7%.
 - Caveats: Revenue is global and consolidated, not US-only. Segments double count: refiners' revenue includes crude bought from producers. Majors' and refiners' revenue include pass-through product sales, so revenue overstates value added; it measures scale of flows, not market value. Survivor universe of 18 names: excludes private producers and acquired/bankrupt names. Companies without a standard us-gaap revenue tag are left out, not estimated.
