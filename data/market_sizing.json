@@ -9,7 +9,7 @@
     "us_crude_production_bbl": 4986655000.0,
     "us_crude_production_avg_kbd": 13662.068493,
     "us_crude_value_usd": 325914605204.91064,
-    "eia_as_of": "2026-10-23",
+    "eia_as_of": "2026-10-29",
     "caveats": [
       "Wellhead value at WTI Cushing spot; realized prices differ by grade and basin.",
       "Crude only: excludes natural gas, NGLs and refined products.",
