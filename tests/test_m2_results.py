@@ -79,3 +79,25 @@ def test_percentiles_within_segment_bounded():
 def test_readme_findings_rendered_from_results():
     text = (RESULTS.parent / "README.md").read_text()
     assert readme.render() in text
+
+
+def test_topdown_month_value_is_kbd_times_days_times_wti(monkeypatch):
+    """2024 (leap year), 10,000 kb/d every month, one WTI print per month at 60..71.
+
+    barrels = 10,000 * 1,000 * 366 = 3,660,000,000
+    value = 10,000,000 * sum(days_in_month * price) = 10,000,000 * 23,978
+    """
+    year = 2024
+    months = pd.date_range("2024-01-01", periods=12, freq="MS")
+    prices = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71]
+    prod = pd.Series(10_000.0, index=months)
+    monkeypatch.setattr(sizing.eia_snapshot, "series", lambda _name: prod)
+    monkeypatch.setattr(sizing.eia_snapshot, "meta", lambda: {"as_of": "2024-12-31"})
+
+    out = sizing.topdown(year, pd.DataFrame({"date": months, "value": prices}))
+
+    assert out["available"] is True and out["year"] == year
+    assert out["us_crude_production_bbl"] == 3_660_000_000
+    assert out["us_crude_production_avg_kbd"] == 10_000
+    assert out["us_crude_value_usd"] == 239_780_000_000
+    assert out["eia_as_of"] == "2024-12-31"
