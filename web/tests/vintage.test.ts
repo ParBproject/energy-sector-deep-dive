@@ -16,6 +16,11 @@ function assertPullIsSecondary(v: Vintage) {
     expect(stamp).toContain(`${label} ${v.published}`);
     expect(stamp.indexOf(`${label} ${v.published}`)).toBeLessThan(stamp.indexOf("retrieved"));
   }
+  if (v.shares?.observation_date) {
+    expect(stamp).toContain(`shares as of ${v.shares.observation_date}`);
+    expect(stamp.indexOf("shares as of")).toBeGreaterThan(stamp.indexOf(`Data as of ${v.observation_date}`));
+    expect(stamp.indexOf("shares as of")).toBeLessThan(stamp.indexOf("retrieved"));
+  }
 }
 
 describe("export vintages", () => {
@@ -31,6 +36,15 @@ describe("export vintages", () => {
     );
     expect(vintageStamp({ observation_date: "2025-12-31", published: "2026-02-26", published_as: "filed", retrieved_at: "2026-10-23" }, "SEC")).toBe(
       "Data as of 2025-12-31 · filed 2026-02-26 · retrieved 2026-10-23 · Source: SEC",
+    );
+    expect(vintageStamp({
+      observation_date: "2025-12-31",
+      published: "2026-02-26",
+      published_as: "filed",
+      shares: { observation_date: "2026-07-31", published: "2026-08-06", published_as: "filed" },
+      retrieved_at: "2026-10-23",
+    }, "SEC")).toBe(
+      "Data as of 2025-12-31 · filed 2026-02-26 · shares as of 2026-07-31, filed 2026-08-06 · retrieved 2026-10-23 · Source: SEC",
     );
   });
 
@@ -77,7 +91,10 @@ describe("export vintages", () => {
     const sizing = read("market_sizing.json").vintage;
     expect(fund.published_as).toBe("filed");
     expect(sizing.published_as).toBe("filed");
-    expect(fund.published > sizing.published).toBe(true);
+    expect(fund.observation_date).toBe(sizing.observation_date);
+    expect(fund.shares.observation_date > fund.observation_date).toBe(true);
+    expect(fund.shares.published > fund.published).toBe(true);
+    expect(vintageStamp(fund).indexOf("shares as of")).toBeGreaterThan(vintageStamp(fund).indexOf("filed"));
     expect(read("scenarios.json").vintage.forecaster.published_as).toBe("published");
     expect(read("factor_model.json").vintage.published).toBeUndefined();
   });

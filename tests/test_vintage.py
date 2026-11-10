@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import json
 
+import pandas as pd
+
 from src.analysis.common import as_of_date
+from src.analysis.sizing import chart_years, vintage_for_revenue_rows
 from src.data.snapshot import manifest
 from src.export import vintage, web
 
@@ -69,10 +72,34 @@ def test_filing_dates_are_on_edgar_exports_and_before_the_pull():
     for v in (sizing, fundamentals, clusters):
         assert v["published_as"] == "filed"
         assert v["observation_date"] < v["published"] < v["retrieved_at"]
-    # Cover-page share counts are filed on 10-Qs after the annual 10-K the revenue chart uses.
-    assert fundamentals["published"] > sizing["published"]
-    assert fundamentals["observation_date"] > sizing["observation_date"]
+    # The heatmap's main numbers are the FY ratios, same period as the revenue chart.
+    # A later cover-page share count is a secondary clause, not the "Data as of" date.
+    assert fundamentals["observation_date"] == sizing["observation_date"]
+    shares = fundamentals["shares"]
+    assert shares["published_as"] == "filed"
+    assert shares["observation_date"] > fundamentals["observation_date"]
+    assert shares["published"] > fundamentals["published"]
     assert clusters == fundamentals
+
+
+def test_revenue_stamp_ignores_a_year_the_chart_drops():
+    # 10 of 18 names report a later June year-end: enough to be the "latest" year under the
+    # broad-coverage rule, too few to be drawn. The stamp stays on the years the chart sums.
+    rev = pd.DataFrame({f"T{i}": [1.0, 1.0] for i in range(18)}, index=[2025, 2026])
+    rev.loc[2026, [f"T{i}" for i in range(8)]] = pd.NA
+    assert int(rev.loc[2026].notna().sum()) == 10
+    years = chart_years(rev)
+    assert years == [2025]
+    rows = [
+        {"year": 2025, "end": "2025-12-31", "filed": "2026-02-26"},
+        {"year": 2026, "end": "2026-06-30", "filed": "2026-08-15"},
+    ]
+    dated = vintage_for_revenue_rows(rows, set(years))
+    assert dated == {
+        "observation_date": "2025-12-31",
+        "published": "2026-02-26",
+        "published_as": "filed",
+    }
 
 
 def test_scenario_export_keeps_the_forecaster_publish_date():

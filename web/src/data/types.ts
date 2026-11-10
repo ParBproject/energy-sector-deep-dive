@@ -1,10 +1,13 @@
 import type { Segment } from "../design/tokens";
 
-export interface Vintage {
+export interface DatedFact {
   observation_date?: string;
   published?: string;
   published_as?: "filed" | "published";
+}
+export interface Vintage extends DatedFact {
   retrieved_at?: string;
+  shares?: DatedFact;
   series?: Record<string, { observation_date: string; latest_period?: string; published?: string; published_as?: "filed" | "published" }>;
   forecaster?: Vintage;
 }

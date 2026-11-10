@@ -134,8 +134,6 @@ def company_metrics(when: str | None = None) -> pd.DataFrame:
             if not np.isnan(value):
                 row["equity"] = value
                 sources["equity"] = tag
-                ends.append(_day(picked["end"]))
-                filed.append(_day(picked["filed"]))
                 break
         debt = np.nan
         for combo in DEBT_TAGS:
@@ -144,29 +142,27 @@ def company_metrics(when: str | None = None) -> pd.DataFrame:
             if not np.isnan(vals[0]):
                 debt = float(np.nansum(vals))
                 sources["debt"] = "+".join(combo)
-                for r in picked:
-                    if r is not None and not np.isnan(r["value"]):
-                        ends.append(_day(r["end"]))
-                        filed.append(_day(r["filed"]))
                 break
         row["debt"] = debt
         shares = f[(f["ticker"] == ticker) & (f["concept"] == "EntityCommonStockSharesOutstanding")]
         shares = shares.sort_values(["filed", "end"])
         if shares.empty:
             row["shares"] = np.nan
+            row["shares_end"] = None
+            row["shares_filed"] = None
         else:
             last = shares.iloc[-1]
             row["shares"] = last["value"]
-            ends.append(_day(last["end"]))
-            filed.append(_day(last["filed"]))
+            # Cover-page shares are often a later 10-Q. Keep them off the annual-flow vintage.
+            row["shares_end"] = _day(last["end"])
+            row["shares_filed"] = _day(last["filed"])
         row["price"] = prices[ticker].dropna().iloc[-1]
         row["market_cap"] = row["shares"] * row["price"]
         row["tag_sources"] = sources
         kept_ends = [d for d in ends if d]
         kept_filed = [d for d in filed if d]
-        # Latest period end and latest EDGAR filing among the facts that entered this row.
-        row["fact_end"] = max(kept_ends) if kept_ends else None
-        row["fact_filed"] = max(kept_filed) if kept_filed else None
+        row["annual_end"] = max(kept_ends) if kept_ends else None
+        row["annual_filed"] = max(kept_filed) if kept_filed else None
         rows.append(row)
     m = pd.DataFrame(rows).set_index("ticker")
     m["capex_intensity"] = m["capex"] / m["revenue"]
@@ -179,21 +175,34 @@ def company_metrics(when: str | None = None) -> pd.DataFrame:
 
 
 def source_vintage(when: str | None = None) -> dict:
-    """Latest observation and filing date of the facts ``company_metrics`` actually uses.
+    """Vintage of the annual 10-K flows, with a later share count kept secondary.
 
-    ``observation_date`` is the latest period end (annual flows, or a later cover-page
-    share count). ``published`` is the latest EDGAR ``filed`` date among those facts.
+    ``observation_date`` / ``published`` are the latest fiscal period end and 10-K filing
+    among the annual flow facts (revenue, cash flow, capex, dividends, buybacks). Year-end
+    equity that a later 10-Q restates does not move those dates: the period is still the
+    fiscal year. Cover-page share counts, often a later quarter, go on ``shares``.
     """
     m = company_metrics(when)
-    ends = [d for d in m["fact_end"].tolist() if d]
-    filed = [d for d in m["fact_filed"].tolist() if d]
+    ends = [d for d in m["annual_end"].tolist() if d]
+    filed = [d for d in m["annual_filed"].tolist() if d]
     if not ends or not filed:
         return {}
-    return {
+    out = {
         "observation_date": max(ends),
         "published": max(filed),
         "published_as": "filed",
     }
+    share_ends = [d for d in m["shares_end"].tolist() if d]
+    share_filed = [d for d in m["shares_filed"].tolist() if d]
+    if share_ends and share_filed:
+        share_obs, share_pub = max(share_ends), max(share_filed)
+        if share_obs > out["observation_date"] or share_pub > out["published"]:
+            out["shares"] = {
+                "observation_date": share_obs,
+                "published": share_pub,
+                "published_as": "filed",
+            }
+    return out
 
 
 def percentile_ranks(m: pd.DataFrame) -> pd.DataFrame:

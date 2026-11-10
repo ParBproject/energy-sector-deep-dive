@@ -38,26 +38,63 @@ def _topdown_provenance(year: int, wti_daily: pd.Series) -> dict:
     return out
 
 
-def revenue_source_vintage(when: str | None = None) -> dict:
-    """Latest fiscal period end and filing date of the revenue facts the chart sums."""
-    when = when or as_of_date()
+def chart_years(rev: pd.DataFrame) -> list[int]:
+    """Years the revenue chart draws: up to the latest broadly reported year, and only years
+    where at most one company is missing a revenue tag.
+    """
+    if rev.empty:
+        return []
+    n = len(segment_map())
+    covered = rev.index[rev.notna().sum(axis=1) >= n // 2]
+    if len(covered) == 0:
+        return []
+    latest = int(covered.max())
+    return [
+        int(y) for y in rev.index if int(y) <= latest and int(rev.loc[y].notna().sum()) >= n - 1
+    ]
+
+
+def vintage_for_revenue_rows(rows: list[dict], years: set[int]) -> dict:
+    """Observation and filing dates for revenue rows whose year the chart keeps."""
+    kept = [r for r in rows if r["year"] in years]
+    if not kept:
+        return {}
+    return {
+        "observation_date": max(r["end"] for r in kept),
+        "published": max(r["filed"] for r in kept),
+        "published_as": "filed",
+    }
+
+
+def _revenue_rows(when: str) -> list[dict]:
     f = annual_facts(when)
     f = f[f["duration"].between(350, 380) & f["concept"].isin(METRIC_TAGS["revenue"])]
-    ends, filed = [], []
+    rows = []
     for (_, end), g in f.groupby(["ticker", "end"]):
         for tag in METRIC_TAGS["revenue"]:
             hit = g[g["concept"] == tag]
             if not hit.empty:
-                ends.append(str(end)[:10])
-                filed.append(str(hit.sort_values("filed")["filed"].iloc[-1])[:10])
+                end_s = str(end)[:10]
+                rows.append(
+                    {
+                        "year": int(end_s[:4]),
+                        "end": end_s,
+                        "filed": str(hit.sort_values("filed")["filed"].iloc[-1])[:10],
+                    }
+                )
                 break
-    if not ends:
-        return {}
-    return {
-        "observation_date": max(ends),
-        "published": max(filed),
-        "published_as": "filed",
-    }
+    return rows
+
+
+def revenue_source_vintage(when: str | None = None) -> dict:
+    """Latest period end and filing date of the revenue facts the chart sums.
+
+    Years the chart drops (a later fiscal year with too few companies reporting) do not
+    move the stamp ahead of the bars.
+    """
+    when = when or as_of_date()
+    years = set(chart_years(revenue_by_year(when)))
+    return vintage_for_revenue_rows(_revenue_rows(when), years)
 
 
 def topdown(year: int, wti: pd.DataFrame) -> dict:
@@ -117,9 +154,8 @@ def compute(when: str | None = None) -> dict:
     when = when or as_of_date()
     rev = revenue_by_year(when)
     seg = segment_map()
+    years = chart_years(rev)
     latest_year = int(rev.index[rev.notna().sum(axis=1) >= len(seg) // 2].max())
-    # keep years where at most one company lacks a standard revenue tag
-    years = [y for y in rev.index if y <= latest_year and rev.loc[y].notna().sum() >= len(seg) - 1]
     by_seg = {
         s: {
             int(y): rev.loc[y, [t for t in seg if seg[t] == s and t in rev]].sum(min_count=1)

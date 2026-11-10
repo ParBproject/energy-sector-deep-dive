@@ -107,7 +107,7 @@ def for_export(name: str, payload: dict | None = None) -> dict:
     if name == "market_sizing.json":
         return _with_pull(revenue_source_vintage(payload.get("as_of")))
     if name == "clustering.json":
-        # Same fundamental features as the heatmap, including the later share-count filing.
+        # Same annual-flow vintage as the heatmap. A later share count stays on ``shares``.
         return _with_pull(source_vintage())
     if name == "factor_model.json":
         return {"observation_date": payload["sample"]["last_week"], "retrieved_at": pull_date()}
