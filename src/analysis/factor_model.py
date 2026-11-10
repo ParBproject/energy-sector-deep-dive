@@ -73,8 +73,13 @@ def full_sample(panel: pd.DataFrame | None = None) -> dict:
 
 
 def lagged(panel: pd.DataFrame, cols: list[str], lag: int = 1) -> pd.DataFrame:
-    """Features known at the START of week t: the values from week t-lag."""
-    return panel[cols].shift(lag)
+    """Features known at the START of week t: the values from calendar week t-lag.
+
+    The shift is by ``lag`` calendar weeks (``WEEK`` frequency), not by rows, so a missing
+    Friday in ``panel`` cannot turn a one-week lag into a two-week lag. A row whose week
+    t-lag is absent from ``panel`` gets NaN. The result keeps ``panel``'s index.
+    """
+    return panel[cols].shift(lag, freq=WEEK).reindex(panel.index)
 
 
 def walk_forward(y: pd.Series, X: pd.DataFrame, min_train: int = MIN_TRAIN_WEEKS):
@@ -98,11 +103,22 @@ def walk_forward(y: pd.Series, X: pd.DataFrame, min_train: int = MIN_TRAIN_WEEKS
     )
 
 
+def _r2(sse: float, sst: float) -> float:
+    """``1 - SSE/SST``, or NaN when SST is 0 (the benchmark is exact, so R² is undefined)."""
+    return float("nan") if sst == 0 else 1 - sse / sst
+
+
 def oos_r2(wf: pd.DataFrame) -> dict:
+    """Out-of-sample R² of ``pred`` against two benchmarks: ``hist_mean`` and zero.
+
+    Each is ``1 - SSE/SST``. If a benchmark's SST is 0 (``y`` equals it in every row, e.g. a
+    single OOS week with y = hist_mean, or all-zero y), that R² is NaN rather than raising
+    or returning +/-inf.
+    """
     sse = ((wf["y"] - wf["pred"]) ** 2).sum()
     return {
-        "vs_hist_mean": 1 - sse / ((wf["y"] - wf["hist_mean"]) ** 2).sum(),
-        "vs_zero": 1 - sse / (wf["y"] ** 2).sum(),
+        "vs_hist_mean": _r2(sse, ((wf["y"] - wf["hist_mean"]) ** 2).sum()),
+        "vs_zero": _r2(sse, (wf["y"] ** 2).sum()),
         "n_oos_weeks": len(wf),
         "first_oos_week": wf.index[0],
         "last_oos_week": wf.index[-1],

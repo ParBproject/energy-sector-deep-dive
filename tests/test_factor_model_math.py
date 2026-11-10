@@ -37,6 +37,22 @@ def test_lagged_shifts_week_t_values_onto_week_t_plus_1():
     assert lag2.loc[idx[3], "oil"] == 20.0
 
 
+def test_lagged_is_calendar_weeks_not_rows_across_a_missing_friday():
+    # 2020-01-17 is missing: a row shift would put 01-10's value on 01-24 (a two-week lag).
+    idx = pd.to_datetime(["2020-01-03", "2020-01-10", "2020-01-24", "2020-01-31"])
+    panel = pd.DataFrame({"oil": [10.0, 20.0, 30.0, 40.0]}, index=idx)
+    out = fm.lagged(panel, ["oil"])
+    assert out.index.equals(idx)
+    assert np.isnan(out.loc["2020-01-03", "oil"])
+    assert out.loc["2020-01-10", "oil"] == 10.0
+    assert np.isnan(out.loc["2020-01-24", "oil"])  # week 01-17 is unknown, not 01-10
+    assert out.loc["2020-01-31", "oil"] == 30.0
+
+    lag2 = fm.lagged(panel, ["oil"], lag=2)
+    assert lag2.loc["2020-01-24", "oil"] == 20.0  # two calendar weeks back is 01-10
+    assert np.isnan(lag2.loc["2020-01-31", "oil"])  # 01-17 is missing
+
+
 def test_walk_forward_matches_hand_solved_ols_each_window():
     """One factor, three expanding windows. Slopes are the textbook formulas.
 
@@ -179,3 +195,24 @@ def test_oos_r2_perfect_forecast_and_benchmark_forecasts():
     as_zero = wf.copy()
     as_zero["pred"] = 0.0
     assert fm.oos_r2(as_zero)["vs_zero"] == 0
+
+
+@pytest.mark.parametrize(
+    "y, hist_mean",
+    [([2.0, 2.0, 2.0], [2.0, 2.0, 2.0]), ([1.5], [1.5])],
+    ids=["y_equals_hist_mean", "single_oos_week"],
+)
+def test_oos_r2_is_nan_when_hist_mean_sst_is_zero(y, hist_mean):
+    idx = _fridays(len(y))
+    wf = pd.DataFrame({"y": y, "pred": [v + 1 for v in y], "hist_mean": hist_mean}, index=idx)
+    out = fm.oos_r2(wf)
+    assert np.isnan(out["vs_hist_mean"])
+    assert np.isfinite(out["vs_zero"])  # the other benchmark still has variation
+
+
+def test_oos_r2_is_nan_when_zero_benchmark_sst_is_zero():
+    idx = _fridays(2)
+    wf = pd.DataFrame({"y": [0.0, 0.0], "pred": [0.0, 0.0], "hist_mean": [1.0, -1.0]}, index=idx)
+    out = fm.oos_r2(wf)
+    assert np.isnan(out["vs_zero"])  # not 1, even though the forecast is exact
+    assert out["vs_hist_mean"] == 1

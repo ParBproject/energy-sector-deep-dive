@@ -84,6 +84,9 @@ def test_readme_findings_rendered_from_results():
 def test_topdown_month_value_is_kbd_times_days_times_wti(monkeypatch):
     """2024 (leap year), 10,000 kb/d every month, one WTI print per month at 60..71.
 
+    Pricing assumption pinned here: topdown applies a single monthly WTI value (the month's
+    mean, here its only print) to every day of that month; it does not price day by day.
+
     barrels = 10,000 * 1,000 * 366 = 3,660,000,000
     value = 10,000,000 * sum(days_in_month * price) = 10,000,000 * 23,978
     """
@@ -91,7 +94,13 @@ def test_topdown_month_value_is_kbd_times_days_times_wti(monkeypatch):
     months = pd.date_range("2024-01-01", periods=12, freq="MS")
     prices = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71]
     prod = pd.Series(10_000.0, index=months)
-    monkeypatch.setattr(sizing.eia_snapshot, "series", lambda _name: prod)
+    asked = []
+
+    def series(name):
+        asked.append(name)
+        return prod
+
+    monkeypatch.setattr(sizing.eia_snapshot, "series", series)
     monkeypatch.setattr(sizing.eia_snapshot, "meta", lambda: {"as_of": "2024-12-31"})
 
     out = sizing.topdown(year, pd.DataFrame({"date": months, "value": prices}))
@@ -101,3 +110,4 @@ def test_topdown_month_value_is_kbd_times_days_times_wti(monkeypatch):
     assert out["us_crude_production_avg_kbd"] == 10_000
     assert out["us_crude_value_usd"] == 239_780_000_000
     assert out["eia_as_of"] == "2024-12-31"
+    assert asked == ["crude_production_us"]  # the EIA key is part of the contract
