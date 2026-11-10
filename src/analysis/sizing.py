@@ -39,18 +39,25 @@ def _topdown_provenance(year: int, wti_daily: pd.Series) -> dict:
 
 
 def chart_years(rev: pd.DataFrame) -> list[int]:
-    """Years the revenue chart draws: up to the latest broadly reported year, and only years
-    where at most one company is missing a revenue tag.
+    """Years the revenue chart draws.
+
+    Cutoffs use the column count of ``rev`` (one column per company in that frame), not the
+    live universe, so a caller can document the rule with a fixture of any width. A year is
+    eligible once at least half the columns report. The chart then keeps years up to that
+    latest eligible year, dropping any year missing more than one company.
     """
     if rev.empty:
         return []
-    n = len(segment_map())
+    n = int(rev.shape[1])
+    if n == 0:
+        return []
     covered = rev.index[rev.notna().sum(axis=1) >= n // 2]
     if len(covered) == 0:
         return []
     latest = int(covered.max())
+    broad = n - 1 if n > 1 else 1
     return [
-        int(y) for y in rev.index if int(y) <= latest and int(rev.loc[y].notna().sum()) >= n - 1
+        int(y) for y in rev.index if int(y) <= latest and int(rev.loc[y].notna().sum()) >= broad
     ]
 
 
@@ -155,7 +162,12 @@ def compute(when: str | None = None) -> dict:
     rev = revenue_by_year(when)
     seg = segment_map()
     years = chart_years(rev)
-    latest_year = int(rev.index[rev.notna().sum(axis=1) >= len(seg) // 2].max())
+    if not years:
+        raise ValueError("no fiscal year has enough companies reporting revenue to chart")
+    # Same year the bars and the revenue stamp use. The broader "half the names reported"
+    # cutoff can name a later year that chart_years then drops, and indexing the bars with
+    # that year raises KeyError.
+    latest_year = max(years)
     by_seg = {
         s: {
             int(y): rev.loc[y, [t for t in seg if seg[t] == s and t in rev]].sum(min_count=1)
