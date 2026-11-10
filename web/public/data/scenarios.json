@@ -1,4 +1,14 @@
 {
+  "vintage": {
+    "observation_date": "2026-08-28",
+    "retrieved_at": "2026-10-23",
+    "forecaster": {
+      "observation_date": "2026-09-29",
+      "retrieved_at": "2026-10-22",
+      "published": "2026-09-30",
+      "published_as": "published"
+    }
+  },
   "framing": "Sensitivity analysis from historical weekly co-movement, 2015 onward. Not a trading signal and not a return forecast.",
   "weekly_betas": {
     "majors": {

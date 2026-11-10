@@ -76,7 +76,7 @@ _From `results/*.json`, via `python -m scripts.run_m2`. Data as of 2026-10-22._
 ### Market sizing (proxy)
 ![Segment revenue](docs/img/segment_revenue.png)
 
-- Top-down: US field crude output in 2025 was 13,662 kb/d (4.99bn bbl), worth **$326bn** at monthly average WTI (EIA MCRFPUS2 x FRED DCOILWTICO; EIA data as of 2026-10-29). Wellhead value at WTI Cushing spot; realized prices differ by grade and basin. Crude only: excludes natural gas, NGLs and refined products. Production for recent months is EIA's estimate and is revised in later releases.
+- Top-down: US field crude output in 2025 was 13,662 kb/d (4.99bn bbl), worth **$326bn** at monthly average WTI (EIA MCRFPUS2 observed through 2026-07-31, retrieved 2026-10-29; FRED DCOILWTICO through 2025-12-31). Wellhead value at WTI Cushing spot; realized prices differ by grade and basin. Crude only: excludes natural gas, NGLs and refined products. Production for recent months is EIA's estimate and is revised in later releases.
 - Bottom-up proxy: the universe reported **$1,278bn** of FY2025 revenue (17 of 18 companies; missing: APA). Average WTI in 2025: $65.39/bbl.
 - Shares of that revenue: Integrated majors 45.4%, Exploration & production 6.0%, Pipelines & midstream 11.6%, Refining & marketing 30.3%, Oilfield services 6.7%.
 - Caveats: Revenue is global and consolidated, not US-only. Segments double count: refiners' revenue includes crude bought from producers. Majors' and refiners' revenue include pass-through product sales, so revenue overstates value added; it measures scale of flows, not market value. Survivor universe of 18 names: excludes private producers and acquired/bankrupt names. Companies without a standard us-gaap revenue tag are left out, not estimated.
@@ -184,7 +184,7 @@ tests/
 | US commercial crude stocks ex-SPR, kbbl | `WCESTUS1` | weekly | overview chart |
 | US crude and gas rotary rigs | `E_ERTRRO_XR0_NUS_C` | monthly, published with a lag | overview chart |
 
-The workflow runs Thursdays at 15:30 UTC, after EIA's Wednesday Weekly Petroleum Status Report, and on manual dispatch. It needs the `EIA_API_KEY` secret. A series that is empty, non-numeric, outside a wide physical range, duplicated, stale, or shorter than the snapshot already committed fails the run. Nothing is filled in or carried forward, and the previous files stay. On success it rebuilds `results/`, the number blocks in this file, and `web/public/data/`, runs the tests, commits the data to `main`, and pushes the explorer to `gh-pages`. EIA charts show the as-of date from `eia_meta.json`.
+The workflow runs Thursdays at 15:30 UTC, after EIA's Wednesday Weekly Petroleum Status Report, and on manual dispatch. It needs the `EIA_API_KEY` secret. A series that is empty, non-numeric, outside a wide physical range, duplicated, stale, or shorter than the snapshot already committed fails the run. Nothing is filled in or carried forward, and the previous files stay. On success it rebuilds `results/`, the number blocks in this file, and `web/public/data/`, runs the tests, commits the data to `main`, and pushes the explorer to `gh-pages`. EIA charts are stamped with each series' latest observation date. The day the API was called stays on that line as "retrieved", and is not labeled as the data vintage. EDGAR charts add the filing date when the export has one.
 
 A pull request that touches the EIA code fetches into a scratch directory and uploads an `eia-preview` artifact. It does not commit. Locally: `EIA_API_KEY=... python -m scripts.refresh_eia` (`--check` validates without writing).
 

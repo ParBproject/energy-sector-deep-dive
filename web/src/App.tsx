@@ -90,7 +90,10 @@ export function App() {
           <a className="btn linkbtn" href="#/styleguide">Styleguide</a>
         </div>
       </header>
-      <FilterBar asOf={data?.index.as_of} />
+      <FilterBar
+        asOf={data?.index.vintage?.observation_date ?? data?.index.as_of}
+        retrieved={data?.index.vintage?.retrieved_at ?? data?.index.snapshot_built_at.slice(0, 10)}
+      />
       <div className="container"><Nav /></div>
       <main id="main" className="container" ref={main}>
         {error && <p role="alert">Could not load data: {error}</p>}
@@ -107,7 +110,7 @@ export function App() {
           </m.section>
         </AnimatePresence>
         <footer className="foot">
-          Sensitivity analysis and descriptive statistics only; nothing here is a trading signal. Data: yfinance, FRED, SEC EDGAR, Fama-French, U.S. EIA; snapshot {data?.index.snapshot_built_at.slice(0, 10) ?? "…"}, EIA data as of {data?.eia.as_of ?? "…"}.
+          Sensitivity analysis and descriptive statistics only; nothing here is a trading signal. Data: yfinance, FRED, SEC EDGAR, Fama-French, U.S. EIA. Prices as of {data?.index.vintage?.observation_date ?? data?.index.as_of ?? "…"} · snapshot retrieved {data?.index.vintage?.retrieved_at ?? data?.index.snapshot_built_at.slice(0, 10) ?? "…"} · EIA retrieved {data?.eia.vintage?.retrieved_at ?? data?.eia.retrieved_at.slice(0, 10) ?? "…"}.
         </footer>
       </main>
       <CompanyPanel />

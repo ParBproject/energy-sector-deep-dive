@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { tokens } from "../design/tokens";
 import { rangeIdx, rangeReturn } from "../data/derive";
 import { RATIOS } from "../data/types";
-import { RATIO_LABELS, SEGMENT_LABELS, pct, usdBn } from "../format";
+import { RATIO_LABELS, SEGMENT_LABELS, pct, usdBn, vintageStamp } from "../format";
 import { useStore } from "../state/store";
 import { EChart } from "./EChart";
 
@@ -123,7 +123,7 @@ export function CompanyPanel() {
                 ))}
               </tbody>
             </table>
-            <p className="stamp"><span>Sources: yfinance, SEC EDGAR 10-K (filed by {data.fundamentals.as_of})</span></p>
+            <p className="stamp"><span>Sources: yfinance, SEC EDGAR 10-K · {vintageStamp(data.fundamentals.vintage)}</span></p>
           </m.div>
         </>
       )}

@@ -1,6 +1,76 @@
 {
   "as_of": "2026-10-22",
   "snapshot_built_at": "2026-10-23T00:56:26+00:00",
+  "vintage": {
+    "observation_date": "2026-10-22",
+    "retrieved_at": "2026-10-23"
+  },
+  "datasets": {
+    "yfinance": {
+      "observation_date": "2026-10-22",
+      "retrieved_at": "2026-10-23"
+    },
+    "fred": {
+      "observation_date": "2026-10-21",
+      "retrieved_at": "2026-10-23",
+      "series": {
+        "CPIAUCSL": {
+          "observation_date": "2026-09-01"
+        },
+        "DCOILBRENTEU": {
+          "observation_date": "2026-10-20"
+        },
+        "DCOILWTICO": {
+          "observation_date": "2026-10-20"
+        },
+        "DGS10": {
+          "observation_date": "2026-10-21"
+        },
+        "DHHNGSP": {
+          "observation_date": "2026-10-20"
+        },
+        "DTB3": {
+          "observation_date": "2026-10-21"
+        },
+        "INDPRO": {
+          "observation_date": "2026-09-01"
+        }
+      }
+    },
+    "edgar": {
+      "observation_date": "2026-07-31",
+      "published": "2026-08-06",
+      "published_as": "filed",
+      "retrieved_at": "2026-10-23"
+    },
+    "famafrench": {
+      "observation_date": "2026-08-31",
+      "retrieved_at": "2026-10-23"
+    },
+    "eia": {
+      "retrieved_at": "2026-10-29",
+      "series": {
+        "crude_production_us": {
+          "latest_period": "2026-07",
+          "observation_date": "2026-07-31"
+        },
+        "crude_stocks_us": {
+          "latest_period": "2026-10-23",
+          "observation_date": "2026-10-23"
+        },
+        "rotary_rigs_us": {
+          "latest_period": "2026-02",
+          "observation_date": "2026-02-28"
+        }
+      }
+    },
+    "forecaster": {
+      "observation_date": "2026-09-29",
+      "retrieved_at": "2026-10-22",
+      "published": "2026-09-30",
+      "published_as": "published"
+    }
+  },
   "files": [
     "market_sizing.json",
     "returns.json",

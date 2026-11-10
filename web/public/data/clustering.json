@@ -1,4 +1,15 @@
 {
+  "vintage": {
+    "observation_date": "2025-12-31",
+    "published": "2026-02-26",
+    "published_as": "filed",
+    "shares": {
+      "observation_date": "2026-07-31",
+      "published": "2026-08-06",
+      "published_as": "filed"
+    },
+    "retrieved_at": "2026-10-23"
+  },
   "features": [
     "oil_beta",
     "capex_intensity",

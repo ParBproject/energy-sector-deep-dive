@@ -35,7 +35,7 @@ export function ChartCard({ id, title, description, source, asOf, loading, span 
       {loading ? <Skeleton /> : children}
       <footer className="stamp">
         {stamp ? (
-          <span className="num" data-testid="eia-stamp">{stamp}</span>
+          <span className="num" data-testid="data-stamp">{stamp}</span>
         ) : (
           <>
             <span>Source: {source ?? "…"}</span>

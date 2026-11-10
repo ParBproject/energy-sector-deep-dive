@@ -79,14 +79,14 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     rows = [
         f"| {n} | `{s['series_id']}` | {s['units']} | {s['rows']} | "
-        f"{s['latest_period']} | {s['latest_value']:,.0f} |"
+        f"{s['latest_period']} | {s['observation_date']} | {s['latest_value']:,.0f} |"
         for n, s in m["series"].items()
     ]
     lines = [
-        f"## EIA refresh {'check ' if args.check else ''}OK · data as of {m['as_of']}",
+        f"## EIA refresh {'check ' if args.check else ''}OK · retrieved {m['as_of']}",
         "",
-        "| series | EIA id | units | rows | latest period | latest value |",
-        "|---|---|---|---|---|---|",
+        "| series | EIA id | units | rows | latest period | observation date | latest value |",
+        "|---|---|---|---|---|---|---|",
         *rows,
     ]
     _summary(lines)
