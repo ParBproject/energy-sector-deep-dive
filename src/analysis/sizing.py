@@ -22,7 +22,12 @@ TOPDOWN_REQUIRES = "US crude oil field production volume (EIA PET MCRFPUS2), not
 
 
 def topdown(year: int, wti: pd.DataFrame) -> dict:
-    """US crude output value for ``year``: sum over months of kb/d x 1000 x days x avg WTI."""
+    """US crude output value for ``year``: sum over months of kb/d x 1000 x days x avg WTI.
+
+    Pricing assumption: each month gets ONE WTI price, the mean of that month's prints
+    (resampled to month start), applied to every day of the month. Daily production is not
+    matched to daily prices. Changing this is a methodology change, not a bug fix.
+    """
     m = eia_snapshot.meta()
     try:
         prod = eia_snapshot.series("crude_production_us")
