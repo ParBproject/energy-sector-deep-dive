@@ -161,7 +161,10 @@ def test_main_reports_failure_in_step_summary(snapdir, tmp_path, monkeypatch):
 def test_successful_refresh_writes_both_files(snapdir):
     later = datetime(2026, 10, 30, 15, 30, tzinfo=timezone.utc)
     m = refresh_eia.refresh(snapdir, fetch=_fetcher_from(_committed_frames()), now=later)
-    assert m["as_of"] == "2026-10-30"
+    assert m["as_of"] == "2026-10-30"  # retrieval date, unchanged
+    rigs = m["series"]["rotary_rigs_us"]
+    assert rigs["observation_date"] == eia_snapshot.observation_date(rigs["latest_period"])
+    assert rigs["observation_date"] != m["as_of"]
     assert eia_snapshot.meta(snapdir) == m
     pd.testing.assert_frame_equal(eia_snapshot.load(snapdir), eia_snapshot.load())
 
@@ -169,15 +172,49 @@ def test_successful_refresh_writes_both_files(snapdir):
 # --- as-of stamp ---------------------------------------------------------------------------
 
 
-def test_exported_as_of_matches_snapshot_metadata():
+def test_observation_date_is_the_period_covered():
+    assert eia_snapshot.observation_date("2026-07") == "2026-07-31"
+    assert eia_snapshot.observation_date("2026-02") == "2026-02-28"
+    assert eia_snapshot.observation_date("2024-02") == "2024-02-29"
+    assert eia_snapshot.observation_date("2026-10-23") == "2026-10-23"
+
+
+def test_series_vintage_keeps_publish_date_only_when_recorded():
+    dated = eia_snapshot.series_vintage({"latest_period": "2026-07", "published": "2026-09-15"})
+    assert dated == {
+        "latest_period": "2026-07",
+        "observation_date": "2026-07-31",
+        "published": "2026-09-15",
+        "published_as": "published",
+    }
+    assert "published" not in eia_snapshot.series_vintage({"latest_period": "2026-10-23"})
+
+
+def test_exported_as_of_is_the_pull_and_series_carry_the_observation():
     meta = eia_snapshot.meta()
     exported = json.loads((web.WEB_DATA / "eia.json").read_text())
     assert exported == json.loads(json.dumps(web.eia_payload()))
     assert exported["as_of"] == meta["as_of"]
+    assert exported["vintage"]["retrieved_at"] == meta["as_of"]
+    assert "observation_date" not in exported["vintage"]
     for name, s in meta["series"].items():
+        obs = eia_snapshot.observation_date(s["latest_period"])
+        assert s["observation_date"] == obs
         assert exported["series"][name]["latest_period"] == s["latest_period"]
+        assert exported["series"][name]["observation_date"] == obs
+        assert exported["vintage"]["series"][name]["observation_date"] == obs
+        assert "published" not in exported["series"][name]
+    # The lag the review called out: rigs and production are not current through the pull day.
+    assert exported["series"]["rotary_rigs_us"]["observation_date"] < meta["as_of"]
+    assert exported["series"]["crude_production_us"]["observation_date"] < meta["as_of"]
 
 
-def test_sizing_topdown_uses_committed_eia_as_of():
+def test_sizing_topdown_uses_observation_not_pull_date():
     sz = json.loads((web.WEB_DATA / "market_sizing.json").read_text())
-    assert sz["topdown_status"]["eia_as_of"] == eia_snapshot.meta()["as_of"]
+    meta = eia_snapshot.meta()
+    td = sz["topdown_status"]
+    obs = eia_snapshot.observation_date(meta["series"]["crude_production_us"]["latest_period"])
+    assert td["eia_as_of"] == obs
+    assert td["eia_retrieved_at"] == meta["as_of"]
+    assert td["eia_as_of"] != td["eia_retrieved_at"]
+    assert td["wti_observation_date"] < td["eia_retrieved_at"]

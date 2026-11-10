@@ -22,8 +22,8 @@ def _topdown_line(td: dict) -> str:
         f"{td['us_crude_production_avg_kbd']:,.0f} kb/d "
         f"({td['us_crude_production_bbl'] / 1e9:.2f}bn bbl), worth "
         f"**${td['us_crude_value_usd'] / 1e9:,.0f}bn** at monthly average WTI "
-        f"(EIA MCRFPUS2 x FRED DCOILWTICO; EIA data as of {td['eia_as_of']}). "
-        + " ".join(td["caveats"])
+        f"(EIA MCRFPUS2 observed through {td['eia_as_of']}, retrieved {td['eia_retrieved_at']}; "
+        f"FRED DCOILWTICO through {td['wti_observation_date']}). " + " ".join(td["caveats"])
     )
 
 

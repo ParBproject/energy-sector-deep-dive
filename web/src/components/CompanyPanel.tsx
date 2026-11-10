@@ -123,7 +123,7 @@ export function CompanyPanel() {
                 ))}
               </tbody>
             </table>
-            <p className="stamp"><span>Sources: yfinance, SEC EDGAR 10-K (filed by {data.fundamentals.as_of})</span></p>
+            <p className="stamp"><span>Sources: yfinance, SEC EDGAR 10-K · data as of {data.fundamentals.vintage.observation_date}{data.fundamentals.vintage.published ? ` · filed ${data.fundamentals.vintage.published}` : ""} · retrieved {data.fundamentals.vintage.retrieved_at}</span></p>
           </m.div>
         </>
       )}

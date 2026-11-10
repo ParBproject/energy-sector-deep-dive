@@ -21,25 +21,65 @@ from src.data import eia_snapshot, snapshot
 TOPDOWN_REQUIRES = "US crude oil field production volume (EIA PET MCRFPUS2), not in snapshot"
 
 
+def _topdown_provenance(year: int, wti_daily: pd.Series) -> dict:
+    """Observation dates of the inputs, with the EIA pull date kept separate.
+
+    ``eia_as_of`` is the production series' latest observation, not the day it was downloaded.
+    """
+    out = {}
+    m = eia_snapshot.meta()
+    if m is not None and "crude_production_us" in m.get("series", {}):
+        info = m["series"]["crude_production_us"]
+        out["eia_as_of"] = eia_snapshot.observation_date(info["latest_period"])
+        out["eia_retrieved_at"] = m["as_of"]
+    year_obs = wti_daily[wti_daily.index.year == year].dropna()
+    if not year_obs.empty:
+        out["wti_observation_date"] = str(year_obs.index.max().date())
+    return out
+
+
+def revenue_source_vintage(when: str | None = None) -> dict:
+    """Latest fiscal period end and filing date of the revenue facts the chart sums."""
+    when = when or as_of_date()
+    f = annual_facts(when)
+    f = f[f["duration"].between(350, 380) & f["concept"].isin(METRIC_TAGS["revenue"])]
+    ends, filed = [], []
+    for (_, end), g in f.groupby(["ticker", "end"]):
+        for tag in METRIC_TAGS["revenue"]:
+            hit = g[g["concept"] == tag]
+            if not hit.empty:
+                ends.append(str(end)[:10])
+                filed.append(str(hit.sort_values("filed")["filed"].iloc[-1])[:10])
+                break
+    if not ends:
+        return {}
+    return {
+        "observation_date": max(ends),
+        "published": max(filed),
+        "published_as": "filed",
+    }
+
+
 def topdown(year: int, wti: pd.DataFrame) -> dict:
     """US crude output value for ``year``: sum over months of kb/d x 1000 x days x avg WTI."""
-    m = eia_snapshot.meta()
     try:
         prod = eia_snapshot.series("crude_production_us")
     except FileNotFoundError:
         return {"available": False, "requires": TOPDOWN_REQUIRES, "reason": "no EIA snapshot"}
     prod = prod[prod.index.year == year]
-    w = wti.set_index("date")["value"]
-    w = w[w.index.year == year].resample("MS").mean()
-    if len(prod) < 12 or w.reindex(prod.index).isna().any():
+    daily = wti.set_index("date")["value"]
+    monthly = daily[daily.index.year == year].resample("MS").mean()
+    provenance = _topdown_provenance(year, daily)
+    if len(prod) < 12 or monthly.reindex(prod.index).isna().any():
         return {
             "available": False,
             "requires": TOPDOWN_REQUIRES,
             "reason": f"only {len(prod)} of 12 months of {year} production in the EIA snapshot",
+            **provenance,
         }
     days = pd.Series(prod.index.days_in_month, index=prod.index)
     barrels = prod * 1000 * days
-    value = (barrels * w.reindex(prod.index)).sum()
+    value = (barrels * monthly.reindex(prod.index)).sum()
     return {
         "available": True,
         "year": year,
@@ -47,7 +87,7 @@ def topdown(year: int, wti: pd.DataFrame) -> dict:
         "us_crude_production_bbl": float(barrels.sum()),
         "us_crude_production_avg_kbd": float(barrels.sum() / days.sum() / 1000),
         "us_crude_value_usd": float(value),
-        "eia_as_of": m["as_of"],
+        **provenance,
         "caveats": [
             "Wellhead value at WTI Cushing spot; realized prices differ by grade and basin.",
             "Crude only: excludes natural gas, NGLs and refined products.",

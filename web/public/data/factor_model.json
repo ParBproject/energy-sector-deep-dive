@@ -1,4 +1,8 @@
 {
+  "vintage": {
+    "observation_date": "2026-08-28",
+    "retrieved_at": "2026-10-23"
+  },
   "sample": {
     "first_week": "2015-01-09",
     "last_week": "2026-08-28",

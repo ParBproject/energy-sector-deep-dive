@@ -6,13 +6,13 @@ import * as O from "../charts/options";
 import { scenarioAt } from "../data/derive";
 import type { AllData } from "../data/types";
 import { tokens, type Segment } from "../design/tokens";
-import { SEGMENT_LABELS, eiaStamp, signed, usdBn } from "../format";
+import { SEGMENT_LABELS, eiaStamp, signed, usdBn, vintageStamp } from "../format";
 import { useStore } from "../state/store";
 
 function useCommon() {
   const st = useStore();
   const focus = useMemo(() => ({ company: st.company, pins: st.pins }), [st.company, st.pins]);
-  return { ...st, focus, src: st.data?.index.sources ?? {}, asOf: st.data?.index.as_of };
+  return { ...st, focus, src: st.data?.index.sources ?? {} };
 }
 
 const EIA_CARDS: [string, string][] = [
@@ -33,31 +33,30 @@ const Loading = ({ title, view }: { title: string; view?: string }) => (
 );
 
 export function Overview({ d }: { d: AllData }) {
-  const { segments, range, focus, setRange, selectCompany, src, asOf } = useCommon();
+  const { segments, range, focus, setRange, selectCompany, src } = useCommon();
   const hero = useMemo(() => O.heroOption(d, segments, range, focus), [d, segments, range, focus]);
   const beta = useMemo(() => O.oilBetaOption(d, segments, focus), [d, segments, focus]);
   const size = useMemo(() => O.sizingOption(d, segments), [d, segments]);
   const eiaOpts = useMemo(() => EIA_CARDS.map(([n]) => O.eiaLineOption(d, n)), [d]);
-  const stamp = eiaStamp(d.eia);
   const td = d.sizing.topdown_status;
   return (
     <>
       <KpiStrip data={d} />
       <div className="grid12 cards">
-        <ChartCard id="hero" span={12} title="Segments vs XLE and the S&P 500" description={HERO_DESC} source={src["timeseries.json"]} asOf={asOf}>
+        <ChartCard id="hero" span={12} title="Segments vs XLE and the S&P 500" description={HERO_DESC} source={src["timeseries.json"]} stamp={vintageStamp(d.ts.vintage, src["timeseries.json"])}>
           <EChart option={hero} label="Line chart of segment total-return indices" onRange={setRange} group="ts" />
         </ChartCard>
-        <ChartCard id="beta" span={6} title="Oil beta by company" description="Daily return per 1% WTI move, 2015 to date. Tap a bar for detail." source={src["returns.json"]} asOf={asOf}>
+        <ChartCard id="beta" span={6} title="Oil beta by company" description="Daily return per 1% WTI move, 2015 to date. Tap a bar for detail." source={src["returns.json"]} stamp={vintageStamp(d.returns.vintage, src["returns.json"])}>
           <EChart option={beta} label="Bar chart of oil beta by company" onPick={selectCompany} />
         </ChartCard>
-        <ChartCard id="sizing" span={6} title="Reported revenue by segment" description={`A bottom-up proxy, not a market size: FY${d.sizing.latest_fiscal_year} total ${usdBn(d.sizing.total_revenue_latest_usd)}. Global revenue, double counts the value chain.`} source={src["market_sizing.json"]} asOf={asOf}>
+        <ChartCard id="sizing" span={6} title="Reported revenue by segment" description={`A bottom-up proxy, not a market size: FY${d.sizing.latest_fiscal_year} total ${usdBn(d.sizing.total_revenue_latest_usd)}. Global revenue, double counts the value chain.`} source={src["market_sizing.json"]} stamp={vintageStamp(d.sizing.vintage, src["market_sizing.json"])}>
           <EChart option={size} label="Stacked bar chart of revenue by segment and year" />
         </ChartCard>
         {EIA_CARDS.map(([n, desc], i) => {
           const s = d.eia.series[n];
           const extra = n === "crude_production_us" && td.available ? ` ${td.year} average ${Math.round(td.us_crude_production_avg_kbd!).toLocaleString("en-US")} kb/d, worth ${usdBn(td.us_crude_value_usd!)} at WTI.` : "";
           return (
-            <ChartCard key={n} id={`eia-${n}`} span={4} title={s.label} description={`${desc} Latest: ${s.latest_period}, ${s.values[s.values.length - 1].toLocaleString("en-US")} ${s.units}.${extra}`} stamp={stamp}>
+            <ChartCard key={n} id={`eia-${n}`} span={4} title={s.label} description={`${desc} Latest: ${s.latest_period}, ${s.values[s.values.length - 1].toLocaleString("en-US")} ${s.units}.${extra}`} stamp={eiaStamp(s, d.eia.retrieved_at)}>
               <EChart option={eiaOpts[i]} label={`Line chart of ${s.label}`} />
             </ChartCard>
           );
@@ -68,19 +67,19 @@ export function Overview({ d }: { d: AllData }) {
 }
 
 export function Returns({ d }: { d: AllData }) {
-  const { segments, range, focus, setRange, selectCompany, src, asOf } = useCommon();
+  const { segments, range, focus, setRange, selectCompany, src } = useCommon();
   const lines = useMemo(() => O.companyLinesOption(d, segments, range, focus), [d, segments, range, focus]);
   const rr = useMemo(() => O.rangeReturnsOption(d, segments, range, focus), [d, segments, range, focus]);
   const dd = useMemo(() => O.drawdownOption(d, segments), [d, segments]);
   return (
     <div className="grid12 cards">
-      <ChartCard id="lines" span={8} title="Company total return" description="Rebased to 100 at the start of the selected range. Hover for values, tap a line for detail." source={src["timeseries.json"]} asOf={asOf}>
+      <ChartCard id="lines" span={8} title="Company total return" description="Rebased to 100 at the start of the selected range. Hover for values, tap a line for detail." source={src["timeseries.json"]} stamp={vintageStamp(d.ts.vintage, src["timeseries.json"])}>
         <EChart option={lines} label="Line chart of company total-return indices" onRange={setRange} onPick={selectCompany} group="ts" />
       </ChartCard>
-      <ChartCard id="rr" span={4} title={range ? `Return ${range[0]} → ${range[1]}` : "Return since 2015"} description="Dashed line: XLE over the same range." source={src["timeseries.json"]} asOf={asOf}>
+      <ChartCard id="rr" span={4} title={range ? `Return ${range[0]} → ${range[1]}` : "Return since 2015"} description="Dashed line: XLE over the same range." source={src["timeseries.json"]} stamp={vintageStamp(d.ts.vintage, src["timeseries.json"])}>
         <EChart option={rr} label="Bar chart of company returns over the selected range" onPick={selectCompany} />
       </ChartCard>
-      <ChartCard id="dd" span={12} title="Drawdowns in three shocks" description="Equal-weighted segment peak-to-trough within each window, with XLE. Hover for peak and trough dates." source={src["returns.json"]} asOf={asOf}>
+      <ChartCard id="dd" span={12} title="Drawdowns in three shocks" description="Equal-weighted segment peak-to-trough within each window, with XLE. Hover for peak and trough dates." source={src["returns.json"]} stamp={vintageStamp(d.returns.vintage, src["returns.json"])}>
         <EChart option={dd} label="Grouped bar chart of drawdowns" />
       </ChartCard>
     </div>
@@ -94,7 +93,7 @@ export function FundamentalsView({ d }: { d: AllData }) {
   const hm = useMemo(() => O.heatmapOption(d, segments, focus), [d, segments, focus]);
   return (
     <div className="grid12 cards">
-      <ChartCard id="heat" span={12} title="Point-in-time fundamentals" description="Shade = percentile within the segment; cell text = raw value. Uses only 10-Ks filed by the as-of date. n/a = filed under a non-standard tag, left blank rather than estimated. Tap a row for detail." source={src["fundamentals.json"]} asOf={d.fundamentals.as_of}>
+      <ChartCard id="heat" span={12} title="Point-in-time fundamentals" description="Shade = percentile within the segment; cell text = raw value. Uses only 10-Ks filed by the as-of date. n/a = filed under a non-standard tag, left blank rather than estimated. Tap a row for detail." source={src["fundamentals.json"]} stamp={vintageStamp(d.fundamentals.vintage, src["fundamentals.json"])}>
         <EChart option={hm} label="Heatmap of fundamental ratios by company" onPick={selectCompany} height={Math.max(360, 30 * order.length + 100)} />
       </ChartCard>
     </div>
@@ -102,16 +101,16 @@ export function FundamentalsView({ d }: { d: AllData }) {
 }
 
 export function Clusters({ d }: { d: AllData }) {
-  const { segments, focus, selectCompany, src, asOf } = useCommon();
+  const { segments, focus, selectCompany, src } = useCommon();
   const sc = useMemo(() => O.clusterOption(d, segments, focus), [d, segments, focus]);
   const sil = useMemo(() => O.silhouetteOption(d), [d]);
   const k = d.clustering.k5.kmeans;
   return (
     <div className="grid12 cards">
-      <ChartCard id="pca" span={8} title={`Clusters vs segments · ARI ${k.adjusted_rand_vs_segments.toFixed(2)}`} description={`k-means (k=5) on oil beta + 5 fundamentals, shown in PCA space. Colour = segment, shape = cluster. ${d.clustering.n_imputed_cells} imputed cells (universe median, flagged).`} source={src["clustering.json"]} asOf={asOf}>
+      <ChartCard id="pca" span={8} title={`Clusters vs segments · ARI ${k.adjusted_rand_vs_segments.toFixed(2)}`} description={`k-means (k=5) on oil beta + 5 fundamentals, shown in PCA space. Colour = segment, shape = cluster. ${d.clustering.n_imputed_cells} imputed cells (universe median, flagged).`} source={src["clustering.json"]} stamp={vintageStamp(d.clustering.vintage, src["clustering.json"])}>
         <EChart option={sc} label="Scatter plot of companies in PCA space" onPick={selectCompany} />
       </ChartCard>
-      <ChartCard id="sil" span={4} title="Silhouette by k" description="Higher = tighter clusters. The true segments score lower than any clustering on these features." source={src["clustering.json"]} asOf={asOf}>
+      <ChartCard id="sil" span={4} title="Silhouette by k" description="Higher = tighter clusters. The true segments score lower than any clustering on these features." source={src["clustering.json"]} stamp={vintageStamp(d.clustering.vintage, src["clustering.json"])}>
         <EChart option={sil} label="Line chart of silhouette score by number of clusters" />
       </ChartCard>
     </div>
@@ -125,10 +124,10 @@ export function Factors({ d }: { d: AllData }) {
   const s = d.factor.sample;
   return (
     <div className="grid12 cards">
-      <ChartCard id="fh" span={7} title="Weekly factor exposures (HAC t-stats)" description={`brent_wti is a crack-spread proxy (${d.factor.crack_spread_proxy.split(";")[0]}). Dollar: ${d.factor.dollar_proxy}.`} source={src["factor_model.json"]} asOf={s.last_week}>
+      <ChartCard id="fh" span={7} title="Weekly factor exposures (HAC t-stats)" description={`brent_wti is a crack-spread proxy (${d.factor.crack_spread_proxy.split(";")[0]}). Dollar: ${d.factor.dollar_proxy}.`} source={src["factor_model.json"]} stamp={vintageStamp(d.factor.vintage, src["factor_model.json"])}>
         <EChart option={fh} label="Heatmap of factor t statistics by segment" />
       </ChartCard>
-      <ChartCard id="oos" span={5} title="Same-week fit vs last week's factors" description={`Walk-forward OOS R² vs historical mean, ${s.n_weeks} weeks. Green: same-week factors. Red: last week's factors.`} source={src["factor_model.json"]} asOf={s.last_week}>
+      <ChartCard id="oos" span={5} title="Same-week fit vs last week's factors" description={`Walk-forward OOS R² vs historical mean, ${s.n_weeks} weeks. Green: same-week factors. Red: last week's factors.`} source={src["factor_model.json"]} stamp={vintageStamp(d.factor.vintage, src["factor_model.json"])}>
         <EChart option={oos} label="Bar chart of out-of-sample R squared" />
       </ChartCard>
     </div>
@@ -136,14 +135,14 @@ export function Factors({ d }: { d: AllData }) {
 }
 
 export function Scenario({ d }: { d: AllData }) {
-  const { segments, oil, setOil, oilSource, setOilSource, src, asOf } = useCommon();
+  const { segments, oil, setOil, oilSource, setOilSource, src } = useCommon();
   const fc = d.scenarios.forecaster_input;
   const move = oilSource === "forecaster" && fc.implied_move_pct != null ? +fc.implied_move_pct.toFixed(2) : oil;
   const opt = useMemo(() => O.scenarioOption(d, segments, move), [d, segments, move]);
   const sc = scenarioAt(d.scenarios, move);
   return (
     <div className="grid12 cards">
-      <ChartCard id="scen" span={8} title="Oil scenario · sensitivity, not a signal" description="Expected one-week move per segment for a WTI move, from weekly oil betas. Whiskers: 95% band from the beta's HAC standard error." source={src["scenarios.json"]} asOf={asOf}>
+      <ChartCard id="scen" span={8} title="Oil scenario · sensitivity, not a signal" description="Expected one-week move per segment for a WTI move, from weekly oil betas. Whiskers: 95% band from the beta's HAC standard error." source={src["scenarios.json"]} stamp={vintageStamp(d.scenarios.vintage, src["scenarios.json"])}>
         <div className="scen-controls">
           <div role="radiogroup" aria-label="Oil move source" className="seg-toggle">
             <button role="radio" aria-checked={oilSource === "slider"} onClick={() => setOilSource("slider")}>Slider</button>
@@ -171,7 +170,7 @@ export function Scenario({ d }: { d: AllData }) {
         <h3 style={{ marginTop: 16 }}>Forecaster preset</h3>
         {fc.implied_move_pct != null ? (
           <p className="desc">
-            commodity-price-forecaster's latest published one-step WTI forecast ({fc.model}, week {fc.target_week}, commit <span className="num">{fc.source_commit?.slice(0, 7)}</span>, vendored {fc.vendored_on}) implied <span className="num">{signed(fc.implied_move_pct, 2)}</span>. WTI actually moved <span className="num">{signed(fc.realized_move_pct ?? 0, 2)}</span>. That step is <strong>already realized</strong>: it is a dated preset, not a forward view.
+            commodity-price-forecaster's latest published one-step WTI forecast ({fc.model}, week {fc.target_week}, prices through <span className="num">{d.scenarios.vintage.forecaster?.observation_date ?? fc.target_week}</span>, published <span className="num">{d.scenarios.vintage.forecaster?.published ?? "…"}</span>, commit <span className="num">{fc.source_commit?.slice(0, 7)}</span>, vendored {d.scenarios.vintage.forecaster?.retrieved_at ?? fc.vendored_on}) implied <span className="num">{signed(fc.implied_move_pct, 2)}</span>. WTI actually moved <span className="num">{signed(fc.realized_move_pct ?? 0, 2)}</span>. That step is <strong>already realized</strong>: it is a dated preset, not a forward view.
           </p>
         ) : (
           <p className="desc">No forecaster output vendored; slider only.</p>

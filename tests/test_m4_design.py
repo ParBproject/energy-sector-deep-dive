@@ -25,12 +25,20 @@ def test_charts_module_has_no_hardcoded_hex_colours():
     assert not re.findall(r"#[0-9A-Fa-f]{6}", src)
 
 
-def test_web_export_copies_results_verbatim():
+def test_web_export_adds_vintage_without_changing_results():
+    """The explorer copy is the pinned result plus a vintage block, nothing else."""
     web.export()
     for name in web.FILES:
-        assert (web.WEB_DATA / name).read_bytes() == (RESULTS / name).read_bytes()
+        exported = json.loads((web.WEB_DATA / name).read_text())
+        pinned = json.loads((RESULTS / name).read_text())
+        dated = exported.pop("vintage")
+        assert exported == pinned
+        assert dated["observation_date"]
+        assert dated["retrieved_at"]
     index = json.loads((web.WEB_DATA / "index.json").read_text())
     assert set(index["sources"]) == {*web.FILES, "timeseries.json", "eia.json"}
+    assert index["vintage"]["observation_date"] == index["as_of"]
+    assert "eia" in index["datasets"] and "edgar" in index["datasets"]
 
 
 def test_timeseries_export_shape_and_values():

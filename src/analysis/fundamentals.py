@@ -76,8 +76,18 @@ def annual_facts(when: str) -> pd.DataFrame:
     return f.assign(duration=days)
 
 
+def _day(value) -> str | None:
+    if value is None or (isinstance(value, float) and np.isnan(value)):
+        return None
+    text = str(value)[:10]
+    return None if text in {"", "NaT", "None", "nan"} else text
+
+
 def _latest_annual_flow(f: pd.DataFrame, ticker: str, tags: list[str], end: str | None = None):
-    """First tag in ``tags`` reported for a full fiscal year (ending ``end`` if given)."""
+    """First tag in ``tags`` reported for a full fiscal year (ending ``end`` if given).
+
+    The fourth item is that fact's EDGAR ``filed`` date, when a row was selected.
+    """
     sub = f[(f["ticker"] == ticker) & f["concept"].isin(tags) & f["duration"].between(350, 380)]
     if end is not None:
         sub = sub[sub["end"] == end]
@@ -85,15 +95,20 @@ def _latest_annual_flow(f: pd.DataFrame, ticker: str, tags: list[str], end: str 
         s = sub[sub["concept"] == tag]
         if not s.empty:
             row = s.sort_values(["end", "filed"]).iloc[-1]
-            return row["value"], row["end"], tag
-    return np.nan, None, None
+            return row["value"], row["end"], tag, _day(row["filed"])
+    return np.nan, None, None, None
 
 
-def _instant(f: pd.DataFrame, ticker: str, tag: str, end: str | None):
+def _instant_row(f: pd.DataFrame, ticker: str, tag: str, end: str | None):
     s = f[(f["ticker"] == ticker) & (f["concept"] == tag) & f["start"].isna()]
     if end is not None:
         s = s[s["end"] == end]
-    return np.nan if s.empty else s.sort_values(["end", "filed"]).iloc[-1]["value"]
+    return None if s.empty else s.sort_values(["end", "filed"]).iloc[-1]
+
+
+def _instant(f: pd.DataFrame, ticker: str, tag: str, end: str | None):
+    row = _instant_row(f, ticker, tag, end)
+    return np.nan if row is None else row["value"]
 
 
 def company_metrics(when: str | None = None) -> pd.DataFrame:
@@ -102,33 +117,56 @@ def company_metrics(when: str | None = None) -> pd.DataFrame:
     prices = snapshot.prices().loc[:when]
     rows = []
     for ticker, seg in segment_map().items():
-        cfo, fy_end, _ = _latest_annual_flow(f, ticker, METRIC_TAGS["cfo"])
+        cfo, fy_end, _, cfo_filed = _latest_annual_flow(f, ticker, METRIC_TAGS["cfo"])
         row = {"ticker": ticker, "segment": seg, "fiscal_year_end": fy_end, "cfo": cfo}
+        ends = [_day(fy_end)]
+        filed = [cfo_filed]
         sources = {}
         for k in ("revenue", "capex", "dividends", "buybacks"):
             # only combine figures from the same fiscal year as operating cash flow
-            val, _, tag = _latest_annual_flow(f, ticker, METRIC_TAGS[k], end=fy_end)
+            val, _, tag, fact_filed = _latest_annual_flow(f, ticker, METRIC_TAGS[k], end=fy_end)
             row[k], sources[k] = val, tag
+            filed.append(fact_filed)
         row["equity"] = np.nan
         for tag in METRIC_TAGS["equity"]:
-            row["equity"] = _instant(f, ticker, tag, fy_end)
-            if not np.isnan(row["equity"]):
+            picked = _instant_row(f, ticker, tag, fy_end)
+            value = np.nan if picked is None else picked["value"]
+            if not np.isnan(value):
+                row["equity"] = value
                 sources["equity"] = tag
+                ends.append(_day(picked["end"]))
+                filed.append(_day(picked["filed"]))
                 break
         debt = np.nan
         for combo in DEBT_TAGS:
-            vals = [_instant(f, ticker, t, fy_end) for t in combo]
+            picked = [_instant_row(f, ticker, t, fy_end) for t in combo]
+            vals = [np.nan if r is None else r["value"] for r in picked]
             if not np.isnan(vals[0]):
                 debt = float(np.nansum(vals))
                 sources["debt"] = "+".join(combo)
+                for r in picked:
+                    if r is not None and not np.isnan(r["value"]):
+                        ends.append(_day(r["end"]))
+                        filed.append(_day(r["filed"]))
                 break
         row["debt"] = debt
         shares = f[(f["ticker"] == ticker) & (f["concept"] == "EntityCommonStockSharesOutstanding")]
         shares = shares.sort_values(["filed", "end"])
-        row["shares"] = shares["value"].iloc[-1] if not shares.empty else np.nan
+        if shares.empty:
+            row["shares"] = np.nan
+        else:
+            last = shares.iloc[-1]
+            row["shares"] = last["value"]
+            ends.append(_day(last["end"]))
+            filed.append(_day(last["filed"]))
         row["price"] = prices[ticker].dropna().iloc[-1]
         row["market_cap"] = row["shares"] * row["price"]
         row["tag_sources"] = sources
+        kept_ends = [d for d in ends if d]
+        kept_filed = [d for d in filed if d]
+        # Latest period end and latest EDGAR filing among the facts that entered this row.
+        row["fact_end"] = max(kept_ends) if kept_ends else None
+        row["fact_filed"] = max(kept_filed) if kept_filed else None
         rows.append(row)
     m = pd.DataFrame(rows).set_index("ticker")
     m["capex_intensity"] = m["capex"] / m["revenue"]
@@ -138,6 +176,24 @@ def company_metrics(when: str | None = None) -> pd.DataFrame:
     m["debt_to_capital"] = m["debt"] / (m["debt"] + m["equity"])
     m["payout_ratio"] = (m["dividends"] + m["buybacks"]) / m["cfo"]
     return m
+
+
+def source_vintage(when: str | None = None) -> dict:
+    """Latest observation and filing date of the facts ``company_metrics`` actually uses.
+
+    ``observation_date`` is the latest period end (annual flows, or a later cover-page
+    share count). ``published`` is the latest EDGAR ``filed`` date among those facts.
+    """
+    m = company_metrics(when)
+    ends = [d for d in m["fact_end"].tolist() if d]
+    filed = [d for d in m["fact_filed"].tolist() if d]
+    if not ends or not filed:
+        return {}
+    return {
+        "observation_date": max(ends),
+        "published": max(filed),
+        "published_as": "filed",
+    }
 
 
 def percentile_ranks(m: pd.DataFrame) -> pd.DataFrame:

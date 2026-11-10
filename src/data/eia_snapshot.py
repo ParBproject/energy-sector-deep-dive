@@ -125,7 +125,41 @@ def series(name: str, directory: Path = SNAPSHOT_DIR) -> pd.Series:
     return pd.Series(g["value"].to_numpy(float), index=pd.to_datetime(g["date"]), name=name)
 
 
+def observation_date(period: str) -> str:
+    """Last calendar day an EIA period covers.
+
+    Weekly periods are already a day (the week-ending date). Monthly periods are
+    ``YYYY-MM``; the observation is that whole month, so the date is its last day.
+    This is the data vintage, not the day the API was called.
+    """
+    text = str(period)
+    if len(text) == 10:
+        pd.Timestamp(text)  # reject anything that is not a real day
+        return text
+    if len(text) == 7:
+        return str(pd.Period(text, freq="M").end_time.date())
+    raise ValueError(f"unrecognised EIA period {period!r}")
+
+
+def series_vintage(info: dict) -> dict:
+    """Observation date for one series, plus a publish date when the metadata has one.
+
+    EIA's data rows do not carry a release date. ``published`` is copied only when a
+    caller already recorded one (for example a future refresh that stores it).
+    """
+    out = {
+        "latest_period": str(info["latest_period"]),
+        "observation_date": observation_date(info["latest_period"]),
+    }
+    published = info.get("published")
+    if published:
+        out["published"] = str(published)[:10]
+        out["published_as"] = str(info.get("published_as") or "published")
+    return out
+
+
 def build_meta(frames: dict[str, pd.DataFrame], retrieved_at: datetime) -> dict:
+    """``as_of`` is the retrieval date. Each series' ``observation_date`` is its vintage."""
     out = {
         "source": SOURCE_LABEL,
         "api": "https://api.eia.gov/v2",
@@ -137,6 +171,7 @@ def build_meta(frames: dict[str, pd.DataFrame], retrieved_at: datetime) -> dict:
         route, series_id, desc = DEFAULT_SERIES[name]
         spec = SPECS[name]
         units = sorted({u for u in df["units"].dropna().astype(str)}) or [spec.units]
+        latest_period = str(df["period"].iloc[-1])
         out["series"][name] = {
             "series_id": series_id,
             "route": route,
@@ -145,7 +180,8 @@ def build_meta(frames: dict[str, pd.DataFrame], retrieved_at: datetime) -> dict:
             "units": units[0],
             "rows": int(len(df)),
             "first_period": str(df["period"].iloc[0]),
-            "latest_period": str(df["period"].iloc[-1]),
+            "latest_period": latest_period,
+            "observation_date": observation_date(latest_period),
             "latest_value": float(df["value"].iloc[-1]),
         }
     return out

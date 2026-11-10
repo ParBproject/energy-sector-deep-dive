@@ -52,7 +52,7 @@ function Context() {
   );
 }
 
-export function FilterBar({ asOf }: { asOf?: string }) {
+export function FilterBar({ asOf, retrieved }: { asOf?: string; retrieved?: string }) {
   const { segments, sheetOpen, setSheet, resetSegments, pins, range } = useStore();
   const reduced = useReducedMotion();
   const extra = pins.length + (range ? 1 : 0);
@@ -68,7 +68,16 @@ export function FilterBar({ asOf }: { asOf?: string }) {
         <button className="btn only-mobile" onClick={() => setSheet(true)} aria-haspopup="dialog">
           Filters <span className="badge num">{segments.length}/5{extra ? ` +${extra}` : ""}</span>
         </button>
-        <span className="label num asof">{asOf ? `As of ${asOf}` : "Loading…"}</span>
+        <span className="label num asof" data-testid="as-of">
+          {asOf ? (
+            <>
+              <span>Data as of {asOf}</span>
+              {retrieved && <span className="retrieved">retrieved {retrieved}</span>}
+            </>
+          ) : (
+            "Loading…"
+          )}
+        </span>
       </div>
       {createPortal(
         <AnimatePresence>

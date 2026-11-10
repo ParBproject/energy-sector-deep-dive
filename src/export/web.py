@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import json
-import shutil
 
 from src.analysis.common import RESULTS, ROOT
 from src.data import snapshot
+from src.export import vintage
 
 WEB_DATA = ROOT / "web" / "public" / "data"
 FILES = [
@@ -50,43 +50,60 @@ EIA_LABELS = {
 }
 
 
+def _with_vintage(name: str, payload: dict) -> dict:
+    return {"vintage": vintage.for_export(name, payload), **payload}
+
+
 def eia_payload() -> dict:
-    """Committed EIA snapshot -> chart-ready JSON; the as-of stamp comes from its metadata."""
+    """Committed EIA snapshot -> chart-ready JSON.
+
+    ``as_of`` stays the retrieval date. Each series carries its own observation date, and a
+    publish date when the metadata has one. The pull date is only ``retrieved_at`` / vintage.
+    """
     from src.data import eia_snapshot
 
     m = eia_snapshot.meta()
-    out = {
-        "as_of": m["as_of"],
-        "retrieved_at": m["retrieved_at"],
-        "source": m["source"],
-        "series": {},
-    }
+    series = {}
     for name, info in m["series"].items():
         s = eia_snapshot.series(name)
         label, units = EIA_LABELS[name]
         scale = 1 / 1000 if units == "million bbl" else 1  # kbbl -> million bbl
-        out["series"][name] = {
+        dated = eia_snapshot.series_vintage(info)
+        series[name] = {
             "label": label,
             "units": units,
             "series_id": info["series_id"],
             "frequency": info["frequency"],
-            "latest_period": info["latest_period"],
+            "latest_period": dated["latest_period"],
+            "observation_date": dated["observation_date"],
+            **{k: dated[k] for k in ("published", "published_as") if k in dated},
             "dates": [d.strftime("%Y-%m-%d") for d in s.index],
             "values": [round(v * scale, 3) for v in s.tolist()],
         }
-    return out
+    return {
+        "as_of": m["as_of"],
+        "retrieved_at": m["retrieved_at"],
+        "source": m["source"],
+        "vintage": vintage.eia_vintage(),
+        "series": series,
+    }
 
 
 def export() -> dict:
     WEB_DATA.mkdir(parents=True, exist_ok=True)
     for name in FILES:
-        shutil.copyfile(RESULTS / name, WEB_DATA / name)
-    (WEB_DATA / "timeseries.json").write_text(json.dumps(timeseries(), separators=(",", ":")))
+        payload = _with_vintage(name, json.loads((RESULTS / name).read_text()))
+        (WEB_DATA / name).write_text(json.dumps(payload, indent=2) + "\n")
+    ts = _with_vintage("timeseries.json", timeseries())
+    (WEB_DATA / "timeseries.json").write_text(json.dumps(ts, separators=(",", ":")))
     (WEB_DATA / "eia.json").write_text(json.dumps(eia_payload(), separators=(",", ":")))
     m = snapshot.manifest()
+    returns = json.loads((RESULTS / "returns.json").read_text())
     index = {
-        "as_of": json.loads((RESULTS / "returns.json").read_text())["as_of"],
+        "as_of": returns["as_of"],
         "snapshot_built_at": m["built_at"],
+        "vintage": vintage.for_export("returns.json", returns),
+        "datasets": vintage.catalog(),
         "files": [*FILES, "timeseries.json", "eia.json"],
         "sources": {
             "market_sizing.json": (

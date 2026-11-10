@@ -1,9 +1,25 @@
 import type { Segment } from "../design/tokens";
 
-export interface DataIndex { as_of: string; snapshot_built_at: string; files: string[]; sources: Record<string, string> }
+export interface Vintage {
+  observation_date?: string;
+  published?: string;
+  published_as?: "filed" | "published";
+  retrieved_at?: string;
+  series?: Record<string, { observation_date: string; latest_period?: string; published?: string; published_as?: "filed" | "published" }>;
+  forecaster?: Vintage;
+}
+export interface DataIndex {
+  as_of: string;
+  snapshot_built_at: string;
+  vintage: Vintage;
+  datasets: Record<string, Vintage>;
+  files: string[];
+  sources: Record<string, string>;
+}
 export interface Beta { beta: number; se_hac: number; t_hac: number; ci95: [number, number]; r2: number; n: number }
 export interface Drawdown { max_drawdown: number; peak: string; trough: string }
 export interface ReturnsResult {
+  vintage: Vintage;
   as_of: string;
   betas: { companies: Record<string, Beta & { segment: Segment }>; segments: Record<Segment, Beta>; benchmarks: Record<string, Beta> };
   highest_beta_segment: Segment;
@@ -12,6 +28,7 @@ export interface ReturnsResult {
   drawdowns: Record<string, Record<string, Drawdown>>;
 }
 export interface SizingResult {
+  vintage: Vintage;
   latest_fiscal_year: number;
   total_revenue_latest_usd: number;
   companies_reporting_by_year: Record<string, number>;
@@ -35,6 +52,7 @@ export interface CompanyFundamentals extends Record<Ratio, number | null> {
   segment_percentile: Record<Ratio, number | null>;
 }
 export interface FundamentalsResult {
+  vintage: Vintage;
   as_of: string;
   universe_size: number;
   definitions: Record<Ratio, string>;
@@ -42,6 +60,7 @@ export interface FundamentalsResult {
   companies: Record<string, CompanyFundamentals>;
 }
 export interface FactorResult {
+  vintage: Vintage;
   sample: { first_week: string; last_week: string; n_weeks: number };
   factors: string[];
   crack_spread_proxy: string;
@@ -51,6 +70,7 @@ export interface FactorResult {
   walk_forward_predictive_lag1: Record<Segment, { vs_hist_mean: number; vs_zero: number }>;
 }
 export interface ClusteringResult {
+  vintage: Vintage;
   features: string[];
   silhouette_by_k: Record<"kmeans" | "ward", Record<string, number>>;
   k5: Record<"kmeans" | "ward", { adjusted_rand_vs_segments: number; silhouette: number; assignments: Record<string, number> }>;
@@ -71,12 +91,13 @@ export interface ForecasterInput {
   vendored_on?: string;
 }
 export interface ScenarioResult {
+  vintage: Vintage;
   framing: string;
   weekly_betas: Record<Segment, { beta: number; se_hac: number; resid_sd: number; r2: number }>;
   grid: Record<string, Record<Segment, ScenarioBand>>;
   forecaster_input: ForecasterInput;
 }
-export interface TimeSeries { dates: string[]; segments: Record<Segment, number[]>; symbols: Record<string, (number | null)[]> }
+export interface TimeSeries { vintage: Vintage; dates: string[]; segments: Record<Segment, number[]>; symbols: Record<string, (number | null)[]> }
 export interface TopDown {
   available: boolean;
   reason?: string;
@@ -84,9 +105,22 @@ export interface TopDown {
   us_crude_production_avg_kbd?: number;
   us_crude_value_usd?: number;
   eia_as_of?: string;
+  eia_retrieved_at?: string;
+  wti_observation_date?: string;
 }
-export interface EiaSeries { label: string; units: string; series_id: string; frequency: string; latest_period: string; dates: string[]; values: number[] }
-export interface EiaData { as_of: string; retrieved_at: string; source: string; series: Record<string, EiaSeries> }
+export interface EiaSeries {
+  label: string;
+  units: string;
+  series_id: string;
+  frequency: string;
+  latest_period: string;
+  observation_date: string;
+  published?: string;
+  published_as?: "filed" | "published";
+  dates: string[];
+  values: number[];
+}
+export interface EiaData { vintage: Vintage; as_of: string; retrieved_at: string; source: string; series: Record<string, EiaSeries> }
 export interface AllData {
   index: DataIndex;
   returns: ReturnsResult;
